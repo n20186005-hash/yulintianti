@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import TodayStatus from '../components/TodayStatus.astro';
+import notices from '../data/notices.json';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '今日狀況', href: '/today/' },
+];
+---
+
+<BaseLayout
+  title="南寮魚鱗天梯今天適合去嗎？天氣、風速與夕陽"
+  description="南寮魚鱗天梯今天適合去嗎？整理今日天氣、平均風速、降雨機率、日落時間與潮汐，幫你在出發前快速判斷。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">南寮魚鱗天梯今天適合去嗎？</h1>
+    <p class="mt-3 text-ink/75">
+      綜合天氣、風速、降雨、夕陽與潮汐給你一個簡單建議。安全條件優先：一旦有強風、大雨或海象警示，一律建議改期。
+    </p>
+
+    <div class="mt-6">
+      <TodayStatus compact={true} />
+    </div>
+
+    <section class="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-5">
+      <h2 class="text-base font-semibold text-amber-900">安全提醒</h2>
+      <ul class="mt-2 space-y-1.5 text-sm text-amber-900/90">
+        {notices.items.map((n) => <li>· {n.text}</li>)}
+      </ul>
+    </section>
+
+    <section class="prose-cn mt-8">
+      <h2>判斷邏輯</h2>
+      <p>我們先看是否有安全警示，沒有警示後再依下列權重評估：</p>
+      <ul>
+        <li>天氣狀況 30%、風速 25%、降雨機率 15%</li>
+        <li>夕陽可見度 15%、潮汐 10%、假日人流 5%</li>
+      </ul>
+      <p>
+        我們刻意不給「幾分」這種精確分數，避免被誤解為安全保證。即時天氣與海象請以
+        <a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener">中央氣象署</a>為準，
+        並留意<a href="/weather/">天氣與海象</a>、<a href="/tide/">潮汐</a>與<a href="/sunset/">日落時間</a>。
+      </p>
+      <blockquote>
+        提醒：本頁天氣為預報示意，實際請以官方即時資料與現場公告為準。若即時資料暫時無法更新，會顯示最後成功更新時間，並提供中央氣象署入口。
+      </blockquote>
+    </section>
+  </div>
+</BaseLayout>

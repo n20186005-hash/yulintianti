@@ -1,0 +1,110 @@
+---
+import { SITE } from '../data/site.js';
+import { getSunset, getGoldenWindow } from '../lib/sunset';
+import { getTideForDate, getNextTides } from '../lib/tide';
+import { evaluateStatus, STATUS_STYLE, type Conditions } from '../lib/status-score';
+import { todayISOInTaipei } from '../lib/format';
+
+interface Props {
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+
+const todayISO = todayISOInTaipei();
+const now = new Date();
+const sunset = getSunset(now, SITE.geo.lat, SITE.geo.lng);
+const golden = getGoldenWindow(now, SITE.geo.lat, SITE.geo.lng);
+const tideDay = getTideForDate(todayISO);
+const { nextHigh, nextLow } = getNextTides(tideDay, '10:30');
+
+// 示意天氣條件（實際資料請於部署後接中央氣象署 API；此處為預報示意）
+const sample: Conditions = {
+  warning: false,
+  weatherScore: 78,
+  windMs: 6,
+  rainProb: 20,
+  sunsetVisible: 80,
+  tideScore: 70,
+  holidayCrowd: 60,
+};
+const status = evaluateStatus(sample);
+const s = STATUS_STYLE[status.level];
+
+const rows = [
+  { label: '日落時間', value: sunset, id: 'today-sunset' },
+  { label: '降雨機率', value: `${sample.rainProb}%` },
+  { label: '平均風速', value: `每秒 ${sample.windMs} 公尺` },
+  { label: '下一次乾潮', value: nextLow ? nextLow.time : '--:--' },
+  { label: '下一次滿潮', value: nextHigh ? nextHigh.time : '--:--' },
+];
+---
+
+<section
+  aria-labelledby="today-heading"
+  class="rounded-2xl border border-scale bg-white p-6 shadow-sm"
+  data-lat={SITE.geo.lat}
+  data-lng={SITE.geo.lng}
+>
+  <div class="flex items-center justify-between gap-3">
+    <h2 id="today-heading" class="text-xl">今天適合去魚鱗天梯嗎？</h2>
+  </div>
+
+  <div class:list={['mt-4 flex items-start gap-3 rounded-xl border p-4', s.bg]}>
+    <span class:list={['mt-1.5 h-3 w-3 shrink-0 rounded-full', s.dot]} aria-hidden="true"></span>
+    <div>
+      <p class:list={['text-lg font-bold', s.text]}>今日旅遊建議：{status.label}</p>
+      <p class="mt-1 text-sm text-ink/80">{status.reason}</p>
+    </div>
+  </div>
+
+  <dl class="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-3">
+    {
+      rows.map((r) => (
+        <div class="rounded-lg bg-scale/70 px-3 py-3">
+          <dt class="text-xs text-ink/60">{r.label}</dt>
+          <dd class="mt-0.5 text-lg font-semibold text-deepsea" id={r.id}>{r.value}</dd>
+        </div>
+      ))
+    }
+  </dl>
+
+  {golden && (
+    <p class="mt-4 text-sm text-ink/75" id="golden-window">
+      最佳觀賞窗口約 <strong>{golden.start}–{golden.end}</strong>（日落 {golden.sunset}）。
+    </p>
+  )}
+
+  {!compact && (
+    <div class="mt-5 flex flex-wrap gap-2">
+      <a href="/today/" class="rounded-full bg-deepsea px-4 py-2 text-sm font-semibold text-white hover:bg-ink">今日狀況詳情</a>
+      <a href="/tide/" class="rounded-full border border-deepsea px-4 py-2 text-sm font-semibold text-deepsea hover:bg-scale">查看潮汐</a>
+      <a href="/sunset/" class="rounded-full border border-deepsea px-4 py-2 text-sm font-semibold text-deepsea hover:bg-scale">日落時間</a>
+    </div>
+  )}
+
+  <p class="mt-4 text-xs leading-relaxed text-ink/55">
+    潮汐及海象為預報資料，實際狀況可能不同。請遵守現場封鎖、警示及工作人員指示。即時天氣以
+    <a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener" class="underline">中央氣象署</a>為準。
+  </p>
+</section>
+
+<script>
+  // 於瀏覽器端以「使用者當日日期」重新計算日落，避免靜態頁面顯示過期資訊
+  import { getSunset, getGoldenWindow } from '../lib/sunset';
+
+  const el = document.querySelector<HTMLElement>('[data-lat][data-lng]');
+  if (el) {
+    const lat = parseFloat(el.dataset.lat!);
+    const lng = parseFloat(el.dataset.lng!);
+    const now = new Date();
+
+    const sunsetEl = document.getElementById('today-sunset');
+    if (sunsetEl) sunsetEl.textContent = getSunset(now, lat, lng);
+
+    const g = getGoldenWindow(now, lat, lng);
+    const gEl = document.getElementById('golden-window');
+    if (g && gEl) {
+      gEl.innerHTML = `最佳觀賞窗口約 <strong>${g.start}–${g.end}</strong>（日落 ${g.sunset}）。`;
+    }
+  }
+</script>

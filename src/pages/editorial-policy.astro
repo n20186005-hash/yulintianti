@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '編輯政策', href: '/editorial-policy/' },
+];
+---
+
+<BaseLayout
+  title="編輯政策｜南寮魚鱗天梯如何查核與更新資訊"
+  description="南寮魚鱗天梯的編輯政策，說明我們如何查核資訊、定期更新內容、處理合作內容，以及更正錯誤的方式。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">編輯政策</h1>
+    <div class="prose-cn mt-6">
+      <h2>資訊查核</h2>
+      <ul>
+        <li>景點基本資料以新竹市政府等官方來源為主要依據。</li>
+        <li>可能變動的價格、營業時間與交通班次，不永久寫死，並會定期查核更新。</li>
+        <li>天氣、潮汐與海象為預報，明確標示且不呈現為即時保證。</li>
+      </ul>
+      <h2>E-E-A-T</h2>
+      <p>我們盡量提供實地資訊：到訪日期、現場照片、拍攝時間、當時天氣與潮汐、停車實走距離、嬰兒車可通行範圍等。</p>
+      <h2>合作與廣告</h2>
+      <p>付費或合作內容一律標示「合作推薦」「贊助內容」或「廣告」。我們不接受影響排名的付費，也不製作虛假評分。</p>
+      <h2>更正</h2>
+      <p>發現錯誤歡迎來信指正，我們會查核後更新內容。</p>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '聯絡我們', href: '/contact/' },
+];
+const mails = [
+  { label: '編輯與內容', addr: 'editor@yulintianti.com' },
+  { label: '合作與廣告', addr: 'partner@yulintianti.com' },
+];
+---
+
+<BaseLayout
+  title="聯絡我們｜南寮魚鱗天梯"
+  description="聯絡南寮魚鱗天梯：內容指正、資料更新與商業合作的電子信箱。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">聯絡我們</h1>
+    <p class="mt-3 text-ink/75">內容指正、資料更新或商業合作，歡迎來信。我們沒有線上預訂或會員系統。</p>
+
+    <ul class="mt-6 space-y-3">
+      {
+        mails.map((m) => (
+          <li class="flex items-center justify-between gap-3 rounded-xl border border-scale bg-white p-4">
+            <span class="text-ink/80">{m.label}</span>
+            <a href={`mailto:${m.addr}`} class="font-semibold text-deepsea underline">{m.addr}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>

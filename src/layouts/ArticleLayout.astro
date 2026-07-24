@@ -1,0 +1,62 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Hero from '../components/Hero.astro';
+import SourceBlock from '../components/SourceBlock.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  h1: string;
+  oneLiner: string;
+  heroImage: string;
+  heroAlt: string;
+  ogImage?: string;
+  editor: string;
+  lastVerifiedAt: string;
+  breadcrumbs: { name: string; href: string }[];
+  jsonLd: unknown[];
+}
+
+const {
+  title,
+  description,
+  h1,
+  oneLiner,
+  heroImage,
+  heroAlt,
+  ogImage,
+  editor,
+  lastVerifiedAt,
+  breadcrumbs,
+  jsonLd,
+} = Astro.props;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  image={ogImage ?? heroImage}
+  type="article"
+  jsonLd={jsonLd}
+>
+  <Hero image={heroImage} alt={heroAlt} h1={h1} />
+
+  <div class="mx-auto max-w-3xl px-4 py-8">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <p class="mt-5 rounded-xl border-l-4 border-sunset bg-scale/60 p-4 text-lg font-medium text-deepsea">
+      {oneLiner}
+    </p>
+
+    <div class="mt-8">
+      <slot name="before" />
+    </div>
+
+    <article class="prose-cn mt-2">
+      <slot />
+    </article>
+
+    <SourceBlock editor={editor} />
+  </div>
+</BaseLayout>

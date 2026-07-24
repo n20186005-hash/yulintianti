@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { breadcrumb } from '../lib/schema';
+import { NAV_DEST_URL } from '../data/site.js';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '交通停車', href: '/transport/' },
+];
+const navUrl = NAV_DEST_URL;
+---
+
+<BaseLayout
+  title="新竹火車站到南寮魚鱗天梯交通方式"
+  description="新竹火車站到南寮魚鱗天梯的交通方式，整理開車、公車、單車與計程車路線與時間，並附導航連結與停車資訊。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">新竹火車站到南寮魚鱗天梯</h1>
+
+    <a href={navUrl} target="_blank" rel="noopener" class="mt-5 inline-flex items-center gap-2 rounded-full bg-sunset px-5 py-2.5 text-sm font-semibold text-white hover:brightness-95">
+      立即導航到魚鱗天梯
+    </a>
+
+    <div class="prose-cn mt-6">
+      <h2>開車</h2>
+      <p>從新竹市區沿公道五路／東大路往海邊方向，接港南路、新港北路即可抵達，車程約 15 至 20 分鐘。停車請見<a href="/parking/">停車攻略</a>。</p>
+
+      <h2>大眾運輸（公車）</h2>
+      <p>於<strong>新竹火車站</strong>前公車站，搭乘往<strong>南寮</strong>方向的市區公車，於南寮站下車，步行前往魚鱗天梯。班次與路線可能調整，出發前請查詢即時資訊。</p>
+      <ul>
+        <li>建議使用電子票證，並確認末班車時間。</li>
+        <li>假日班次較密，平日離峰請預留候車時間。</li>
+      </ul>
+
+      <h2>單車</h2>
+      <p>魚鱗天梯位於<a href="/17km-coastline/">17 公里海岸線</a>起點附近，可從南寮租車站租車騎乘，沿途風景開闊。</p>
+
+      <h2>計程車／叫車</h2>
+      <p>市區到南寮車程約 15 分鐘，適合行李多或帶長輩、幼兒的旅客。</p>
+
+      <blockquote>公車班次、票價與路線可能變動，請以業者與新竹市公車動態資訊為準。</blockquote>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,51 @@
+---
+import '../styles/global.css';
+import { SITE } from '../data/site.js';
+import Seo from '../components/Seo.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+  jsonLd?: unknown[];
+  appendBrand?: boolean;
+}
+
+const { title, description, image, type, noindex, jsonLd, appendBrand } = Astro.props;
+---
+
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <Seo
+      title={title}
+      description={description}
+      image={image}
+      type={type}
+      noindex={noindex}
+      jsonLd={jsonLd}
+      appendBrand={appendBrand}
+    />
+    <!--
+      Cloudflare Web Analytics：部署後於 Cloudflare 後台取得 token 後，
+      取消下一行註解並填入 token 即可（無 Cookie、不需 GA4）。
+      <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "YOUR_TOKEN"}'></script>
+    -->
+  </head>
+  <body class="min-h-screen bg-white">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded focus:bg-deepsea focus:px-3 focus:py-2 focus:text-white">跳至主要內容</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

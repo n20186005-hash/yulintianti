@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import credits from '../data/image-credits.json';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '圖片授權', href: '/image-credits/' },
+];
+---
+
+<BaseLayout
+  title="圖片授權｜南寮魚鱗天梯使用的照片來源與授權"
+  description="南寮魚鱗天梯使用的照片來源與授權說明，部分照片來自維基共享資源，採 CC 授權，於此列出作者、授權與原始連結。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-4xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">圖片授權</h1>
+    <p class="mt-3 max-w-2xl text-ink/75">
+      本站部分照片來自維基共享資源（Wikimedia Commons），採創用 CC 授權。依授權要求標示作者、授權條款與原始出處如下。
+    </p>
+
+    <div class="mt-8 overflow-x-auto rounded-xl border border-scale">
+      <table class="w-full min-w-[640px] border-collapse text-sm">
+        <thead>
+          <tr class="bg-deepsea text-left text-white">
+            <th class="px-4 py-3 font-semibold">預覽</th>
+            <th class="px-4 py-3 font-semibold">說明</th>
+            <th class="px-4 py-3 font-semibold">作者</th>
+            <th class="px-4 py-3 font-semibold">授權</th>
+            <th class="px-4 py-3 font-semibold">來源</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            credits.map((c, i) => (
+              <tr class:list={[i % 2 ? 'bg-scale/50' : 'bg-white']}>
+                <td class="px-4 py-2.5"><img src={c.file} alt={c.title} width="80" height="60" loading="lazy" class="h-14 w-20 rounded object-cover" /></td>
+                <td class="px-4 py-2.5">{c.title}</td>
+                <td class="px-4 py-2.5">{c.author}</td>
+                <td class="whitespace-nowrap px-4 py-2.5">{c.license}</td>
+                <td class="px-4 py-2.5"><a href={c.source} target="_blank" rel="noopener" class="text-deepsea underline">Wikimedia</a></td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-6 text-sm text-ink/60">
+      Logo 與介面圖示為本站自製。如對圖片授權有疑問，歡迎<a href="/contact/" class="underline">與我們聯絡</a>。
+    </p>
+  </div>
+</BaseLayout>

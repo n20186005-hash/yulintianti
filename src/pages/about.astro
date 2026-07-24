@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SITE } from '../data/site.js';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '關於本站', href: '/about/' },
+];
+---
+
+<BaseLayout
+  title="關於南寮魚鱗天梯｜獨立的南寮旅遊資訊網站"
+  description="關於南寮魚鱗天梯，一個獨立經營的南寮漁港與魚鱗天梯旅遊資訊網站，說明我們的定位、內容範圍與聯絡方式。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">關於本站</h1>
+    <div class="prose-cn mt-6">
+      <p>{SITE.name}（{SITE.url.replace('https://', '')}）是一個獨立經營的旅遊資訊網站，專注整理南寮魚鱗天梯與南寮漁港一帶的即時決策資訊與行程建議。</p>
+      <h2>我們想解決的問題</h2>
+      <p>比起「魚鱗天梯是什麼」，我們更在意你出發前真正關心的事：今天適合去嗎、幾點看夕陽、潮汐如何、車停哪裡。</p>
+      <h2>內容範圍</h2>
+      <ul>
+        <li>魚鱗天梯、南寮漁港、波光市集、親子沙灘、國際風箏賽場、17 公里海岸線</li>
+        <li>今日狀況、潮汐、日落、天氣、停車、交通、地圖</li>
+        <li>行程攻略與美食分類整理</li>
+      </ul>
+      <h2>聯絡我們</h2>
+      <p>合作或內容指正請見<a href="/contact/">聯絡我們</a>。</p>
+      <p>我們的立場與方法，詳見<a href="/editorial-policy/">編輯政策</a>與<a href="/sources/">資料來源</a>。</p>
+    </div>
+  </div>
+</BaseLayout>

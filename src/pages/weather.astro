@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import LiveWeather from '../components/LiveWeather.astro';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '天氣與海象', href: '/weather/' },
+];
+---
+
+<BaseLayout
+  title="南寮魚鱗天梯天氣與海象｜風速、降雨與浪高怎麼看"
+  description="南寮魚鱗天梯天氣與海象指南，教你出發前如何查看風速、降雨機率與浪高，以及各種天氣下的建議與備案。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">南寮魚鱗天梯天氣與海象</h1>
+
+    <div class="mt-6">
+      <LiveWeather />
+    </div>
+
+    <div class="prose-cn mt-8">
+      <p>魚鱗天梯是開放海岸，天氣與海象直接影響體驗與安全。出發前建議查看四項資訊：</p>
+      <h2>要看哪四項</h2>
+      <ul>
+        <li><strong>風速</strong>：海邊風比市區大，超過每秒 9 公尺體感明顯，帶擋風外套。</li>
+        <li><strong>降雨機率</strong>：午後雷陣雨常見，雨天改看<a href="/itineraries/rainy-day/">雨天備案</a>。</li>
+        <li><strong>浪高與海象警示</strong>：有警示時勿靠近下層階梯。</li>
+        <li><strong>夕陽可見度</strong>：雲量太多會遮住夕陽，可對照<a href="/sunset/">日落時間</a>。</li>
+      </ul>
+
+      <h2>各種天氣怎麼安排</h2>
+      <table>
+        <thead><tr><th>狀況</th><th>建議</th></tr></thead>
+        <tbody>
+          <tr><td>晴朗微風</td><td>最佳，日落前一小時抵達看夕陽。</td></tr>
+          <tr><td>風較強</td><td>可前往，帶外套、遠離溼滑下層階梯。</td></tr>
+          <tr><td>可能下雨</td><td>備雨具，或改室內市集與美食。</td></tr>
+          <tr><td>強風大雨／海象警示</td><td>改期，勿靠近海岸下層。</td></tr>
+        </tbody>
+      </table>
+
+      <h2>官方即時資料</h2>
+      <p>本站天氣為預報示意，即時資料請以官方為準：</p>
+      <ul>
+        <li><a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener">中央氣象署</a>（天氣、風力、浪高）</li>
+        <li><a href="https://www.cwa.gov.tw/V8/C/T/Marine.html" target="_blank" rel="noopener">中央氣象署海象／潮汐</a></li>
+        <li><a href="https://opendata.cwa.gov.tw/" target="_blank" rel="noopener">氣象資料開放平臺</a>（沿海 72 小時預報 API）</li>
+      </ul>
+      <blockquote>若日後接入即時 API 失敗，本站不會把預報顯示為即時資料，而會標示最後成功更新時間，並提供官方入口。</blockquote>
+    </div>
+  </div>
+</BaseLayout>

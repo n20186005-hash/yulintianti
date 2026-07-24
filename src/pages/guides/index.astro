@@ -1,0 +1,43 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Card from '../../components/Card.astro';
+import { breadcrumb, website } from '../../lib/schema';
+
+const entries = (await getCollection('guides')).sort(
+  (a, b) => a.data.order - b.data.order
+);
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '旅遊攻略', href: '/guides/' },
+];
+const jsonLd = [website(), breadcrumb(crumbs)];
+---
+
+<BaseLayout
+  title="南寮旅遊攻略｜實用問答與行前準備"
+  description="南寮漁港與魚鱗天梯旅遊攻略，整理常見問題與行前準備，例如晚上值得去嗎、拍照時間與天氣判斷。"
+  jsonLd={jsonLd}
+>
+  <div class="mx-auto max-w-6xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">南寮旅遊攻略</h1>
+    <p class="mt-3 max-w-2xl text-ink/75">實用問答與行前準備，幫你把南寮玩得更順。</p>
+
+    <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        entries.map((e) => (
+          <Card
+            href={`/guides/${e.id}/`}
+            image={e.data.heroImage}
+            alt={e.data.heroAlt}
+            title={e.data.name}
+            desc={e.data.oneLiner}
+          />
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

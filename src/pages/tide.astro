@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import TideTable from '../components/TideTable.astro';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '潮汐', href: '/tide/' },
+];
+---
+
+<BaseLayout
+  title="南寮魚鱗天梯潮汐表｜今日漲潮與退潮時間"
+  description="南寮魚鱗天梯潮汐表，整理未來數日的滿潮與乾潮時間與水位，幫你挑選海景最好的時段拍照。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">南寮魚鱗天梯潮汐表</h1>
+    <p class="mt-3 text-ink/75">
+      滿潮時海水貼近階梯、海景層次最好；退潮時可看到消波結構。挑對潮汐，拍照效果差很多。
+    </p>
+
+    <div class="mt-6">
+      <TideTable days={7} />
+    </div>
+
+    <section class="prose-cn mt-8">
+      <h2>怎麼看潮汐</h2>
+      <ul>
+        <li><strong>想拍海景倒影</strong>：挑接近滿潮的時段。</li>
+        <li><strong>想看消波結構</strong>：挑接近乾潮的時段，注意階梯溼滑。</li>
+        <li><strong>想同時看夕陽</strong>：對照<a href="/sunset/">日落時間</a>，找潮汐與日落接近的日子。</li>
+      </ul>
+      <blockquote>潮汐為預報資料，實際以中央氣象署與現場為準；靠海下層階梯遇警示請勿進入。</blockquote>
+    </section>
+  </div>
+</BaseLayout>

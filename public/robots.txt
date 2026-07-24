@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yulintianti.com/sitemap-index.xml

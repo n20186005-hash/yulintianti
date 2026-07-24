@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '活動快訊', href: '/events/' },
+];
+---
+
+<BaseLayout
+  title="南寮漁港活動快訊｜風箏節與季節活動"
+  description="南寮漁港與新竹海岸活動快訊，整理新竹國際風箏節等季節性活動的方向與查詢管道，實際日期以主辦單位公告為準。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">南寮漁港活動快訊</h1>
+
+    <div class="prose-cn mt-6">
+      <p>南寮漁港一帶全年有不同季節活動，最具代表性的是秋季的新竹國際風箏節。</p>
+      <h2>常見活動</h2>
+      <ul>
+        <li><strong>新竹國際風箏節</strong>（多為秋季，於<a href="/kite-field/">國際風箏賽場</a>）</li>
+        <li>海岸線相關的單車與親子活動</li>
+        <li>市集主題活動與假日市集</li>
+      </ul>
+      <blockquote>本頁不列出未經確認的日期。實際活動時間、地點與內容，請以新竹市政府與主辦單位官方公告為準。</blockquote>
+      <h2>官方查詢</h2>
+      <ul>
+        <li><a href="https://tourism.hccg.gov.tw/" target="_blank" rel="noopener">新竹市政府觀光旅遊網</a></li>
+      </ul>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import PlaceMap from '../components/PlaceMap.astro';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '景點地圖', href: '/map/' },
+];
+---
+
+<BaseLayout
+  title="南寮漁港景點地圖｜停車、洗手間與拍照位置"
+  description="南寮漁港景點地圖，標示魚鱗天梯入口、最佳夕陽拍照點、停車場、洗手間、公車站與周邊景點，並提供導航連結。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-4xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">南寮漁港景點地圖</h1>
+    <p class="mt-3 text-ink/75">
+      標示了入口、拍照點、停車、設施與周邊景點的相對位置，點「導航」即可用手機帶路。
+    </p>
+    <div class="mt-6">
+      <PlaceMap height="440px" />
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,46 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Card from '../../components/Card.astro';
+import { breadcrumb, website } from '../../lib/schema';
+
+const entries = (await getCollection('itineraries')).sort(
+  (a, b) => a.data.order - b.data.order
+);
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '行程攻略', href: '/itineraries/' },
+];
+const jsonLd = [website(), breadcrumb(crumbs)];
+---
+
+<BaseLayout
+  title="南寮漁港行程攻略｜兩小時、半日、一日與親子路線"
+  description="南寮漁港行程攻略，提供兩小時夕陽、半日遊、單車一日、親子與雨天備案等路線，附交通停車與時間安排建議。"
+  jsonLd={jsonLd}
+>
+  <div class="mx-auto max-w-6xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">南寮漁港行程攻略</h1>
+    <p class="mt-3 max-w-2xl text-ink/75">
+      依你有多少時間、和誰同行，挑一條最順的路線。所有行程都以魚鱗天梯與南寮漁港為中心，方便串連。
+    </p>
+
+    <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        entries.map((e) => (
+          <Card
+            href={`/itineraries/${e.id}/`}
+            image={e.data.heroImage}
+            alt={e.data.heroAlt}
+            title={e.data.name}
+            desc={e.data.oneLiner}
+            tag={e.data.duration}
+          />
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

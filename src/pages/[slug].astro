@@ -1,0 +1,93 @@
+---
+import { getCollection, render } from 'astro:content';
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+import QuickFacts from '../components/QuickFacts.astro';
+import { SITE } from '../data/site.js';
+import places from '../data/places.json';
+import {
+  article,
+  breadcrumb,
+  touristAttraction,
+  touristDestination,
+} from '../lib/schema';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('attractions');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const d = entry.data;
+const { Content } = await render(entry);
+
+const place = places.find((p) => p.slug === entry.id);
+const url = `/${entry.id}/`;
+
+const facts = [
+  d.address && { label: '地址', value: d.address },
+  d.admission && { label: '門票', value: d.admission },
+  d.stay && { label: '建議停留', value: d.stay },
+  d.bestTime && { label: '最佳時間', value: d.bestTime },
+  d.audience && { label: '適合族群', value: d.audience },
+  d.accessibility && { label: '無障礙', value: d.accessibility },
+  d.pets && { label: '寵物', value: d.pets },
+  d.night && { label: '夜間', value: d.night },
+].filter(Boolean) as { label: string; value: string }[];
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '南寮景點', href: '/nanliao-harbor/' },
+  { name: d.name, href: url },
+];
+
+const placeSchema =
+  d.schemaType === 'TouristDestination'
+    ? touristDestination({
+        name: d.name,
+        description: d.description,
+        image: d.heroImage,
+        url,
+        includes: ['魚鱗天梯', '波光市集', '親子沙灘', '國際風箏賽場', '17 公里海岸線'],
+      })
+    : touristAttraction({
+        name: d.name,
+        description: d.description,
+        image: d.heroImage,
+        lat: place?.latitude ?? SITE.geo.lat,
+        lng: place?.longitude ?? SITE.geo.lng,
+        address: place?.address ?? d.address,
+        url,
+      });
+
+const jsonLd = [
+  breadcrumb(crumbs),
+  placeSchema,
+  article({
+    headline: d.name,
+    description: d.description,
+    image: d.heroImage,
+    url,
+    author: d.editor,
+  }),
+];
+---
+
+<ArticleLayout
+  title={d.title}
+  description={d.description}
+  h1={d.h1}
+  oneLiner={d.oneLiner}
+  heroImage={d.heroImage}
+  heroAlt={d.heroAlt}
+  ogImage={d.ogImage}
+  editor={d.editor}
+  lastVerifiedAt={d.lastVerifiedAt}
+  breadcrumbs={crumbs}
+  jsonLd={jsonLd}
+>
+  {facts.length > 0 && <QuickFacts slot="before" rows={facts} title="基本資料" />}
+  <Content />
+</ArticleLayout>

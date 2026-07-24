@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '拍照位置', href: '/photo-spots/' },
+];
+
+const spots = [
+  { img: '/images/harbor-scenery.jpg', title: '魚鱗天梯上層步道', tip: '從上層俯拍階梯層疊的線條，最能呈現「魚鱗」感。' },
+  { img: '/images/nanliao-sea.jpg', title: '面海逆光剪影', tip: '日落前 30 分鐘面海拍人物剪影，天空色溫最美。' },
+  { img: '/images/harbor-dock.jpg', title: '波光市集白色建築', tip: '傍晚藍轉橘時拍白色波浪屋頂，乾淨又好看。' },
+  { img: '/images/coast-seaview.jpg', title: '17 公里海岸線車道', tip: '低角度拍筆直車道與海平線，延伸感強。' },
+  { img: '/images/canal-bridge.jpg', title: '港南運河拱橋', tip: '拱形橋倒影配藍天，適合順遊時拍。' },
+  { img: '/images/wetland-lowtide.jpg', title: '香山濕地退潮', tip: '退潮潮間帶配夕陽，可拍鏡面反射。' },
+];
+---
+
+<BaseLayout
+  title="南寮魚鱗天梯最佳拍照位置｜夕陽機位整理"
+  description="南寮魚鱗天梯與南寮漁港最佳拍照位置整理，包含階梯線條、逆光剪影、白色市集與海岸線機位，附拍攝時間建議。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-5xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">南寮最佳拍照位置</h1>
+    <p class="mt-3 max-w-2xl text-ink/75">
+      挑對時間與機位，海景與夕陽的差別很大。以下機位皆在南寮漁港與 17 公里海岸線一帶。
+    </p>
+
+    <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        spots.map((s) => (
+          <figure class="overflow-hidden rounded-2xl border border-scale bg-white">
+            <img src={s.img} alt={s.title} width="800" height="600" loading="lazy" class="aspect-[4/3] w-full object-cover" />
+            <figcaption class="p-4">
+              <h2 class="text-base font-bold text-deepsea">{s.title}</h2>
+              <p class="mt-1 text-sm text-ink/75">{s.tip}</p>
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+
+    <p class="mt-6 text-sm text-ink/60">
+      對照<a href="/sunset/" class="underline">日落時間</a>與<a href="/tide/" class="underline">潮汐</a>安排拍攝；靠海下層溼滑，注意安全與封鎖線。
+    </p>
+  </div>
+</BaseLayout>

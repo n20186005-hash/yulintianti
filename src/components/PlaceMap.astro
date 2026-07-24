@@ -1,0 +1,82 @@
+---
+
+interface MapPoint {
+  name: string;
+  lat: number;
+  lng: number;
+  group: string;
+}
+
+interface Props {
+  points?: MapPoint[];
+  height?: string;
+}
+
+// 預設標記：入口、拍照、停車、設施、周邊
+const defaultPoints: MapPoint[] = [
+  { name: '魚鱗天梯入口', lat: 24.8522, lng: 120.9237, group: '景點' },
+  { name: '最佳夕陽拍照點', lat: 24.8526, lng: 120.9231, group: '景點' },
+  { name: '上層無障礙觀景', lat: 24.8524, lng: 120.9235, group: '景點' },
+  { name: '波光市集', lat: 24.8541, lng: 120.9256, group: '景點' },
+  { name: '親子沙灘', lat: 24.8575, lng: 120.9231, group: '景點' },
+  { name: '國際風箏賽場', lat: 24.8588, lng: 120.9225, group: '景點' },
+  { name: '第一停車場', lat: 24.8549, lng: 120.9262, group: '停車' },
+  { name: '第二停車場', lat: 24.8572, lng: 120.9248, group: '停車' },
+  { name: '機車停車區', lat: 24.8555, lng: 120.9258, group: '停車' },
+  { name: '旅客服務中心', lat: 24.8545, lng: 120.9258, group: '設施' },
+  { name: '公車站（南寮）', lat: 24.8538, lng: 120.926, group: '設施' },
+  { name: '洗手間', lat: 24.8552, lng: 120.9252, group: '設施' },
+  { name: '腳踏車租借', lat: 24.8547, lng: 120.9255, group: '設施' },
+  { name: '17公里海岸線入口', lat: 24.853, lng: 120.9265, group: '周邊' },
+];
+
+const { points = defaultPoints, height = '380px' } = Astro.props;
+
+// 以魚鱗天梯為中心的 Google 地圖內嵌（語系設為 zh-TW）
+const mapSrc =
+  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3620.339151802091!2d120.9211478753706!3d24.85226367793466!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x346834ec00a5e363%3A0x7b406f62e272f08d!2z5Y2X5a-u6bG86bOe5aSp5qKv!5e0!3m2!1szh-TW!2stw!4v1784867545924!5m2!1szh-TW!2stw';
+
+const groups = [...new Set(points.map((p) => p.group))];
+const navLink = (p: MapPoint) =>
+  `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
+---
+
+<div class="overflow-hidden rounded-2xl border border-scale">
+  <iframe
+    title="南寮漁港與魚鱗天梯地圖"
+    src={mapSrc}
+    style={`width:100%;height:${height};border:0;`}
+    loading="lazy"
+    allowfullscreen
+    referrerpolicy="strict-origin-when-cross-origin"
+  ></iframe>
+  <div class="grid gap-4 bg-white p-5 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      groups.map((g) => (
+        <div>
+          <h3 class="text-sm font-semibold text-deepsea">{g}</h3>
+          <ul class="mt-2 space-y-1.5">
+            {points
+              .filter((p) => p.group === g)
+              .map((p) => (
+                <li class="flex items-center justify-between gap-2 text-sm">
+                  <span class="text-ink/85">{p.name}</span>
+                  <a
+                    href={navLink(p)}
+                    target="_blank"
+                    rel="noopener"
+                    class="shrink-0 rounded-full border border-coast px-2.5 py-0.5 text-xs text-deepsea hover:bg-scale"
+                  >
+                    導航
+                  </a>
+                </li>
+              ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+</div>
+<p class="mt-3 text-xs text-ink/55">
+  地圖由 Google 地圖提供；下方標記座標為約略位置，點「導航」開啟 Google 地圖路線。實際入口與設施位置請以現場為準。
+</p>

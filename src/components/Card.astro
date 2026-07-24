@@ -1,0 +1,36 @@
+---
+interface Props {
+  href: string;
+  image?: string;
+  alt?: string;
+  title: string;
+  desc?: string;
+  tag?: string;
+}
+const { href, image, alt = '', title, desc, tag } = Astro.props;
+---
+
+<a
+  href={href}
+  class="group flex flex-col overflow-hidden rounded-2xl border border-scale bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+>
+  {
+    image && (
+      <div class="aspect-[4/3] overflow-hidden bg-scale">
+        <img
+          src={image}
+          alt={alt}
+          width="800"
+          height="600"
+          loading="lazy"
+          class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+      </div>
+    )
+  }
+  <div class="flex flex-1 flex-col p-5">
+    {tag && <span class="mb-2 w-fit rounded-full bg-scale px-2.5 py-0.5 text-xs font-medium text-deepsea">{tag}</span>}
+    <h3 class="text-lg font-bold text-deepsea group-hover:text-sunset">{title}</h3>
+    {desc && <p class="mt-1.5 text-sm text-ink/75">{desc}</p>}
+  </div>
+</a>

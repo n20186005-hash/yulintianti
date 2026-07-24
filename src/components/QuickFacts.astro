@@ -1,0 +1,21 @@
+---
+interface Props {
+  rows: { label: string; value: string }[];
+  title?: string;
+}
+const { rows, title = '快速資訊' } = Astro.props;
+---
+
+<section aria-labelledby="facts-heading" class="rounded-2xl border border-scale bg-scale/50 p-6">
+  <h2 id="facts-heading" class="text-lg">{title}</h2>
+  <dl class="mt-4 divide-y divide-sand/70">
+    {
+      rows.map((r) => (
+        <div class="flex gap-4 py-2.5">
+          <dt class="w-24 shrink-0 text-sm font-medium text-ink/60">{r.label}</dt>
+          <dd class="text-sm text-ink">{r.value}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>

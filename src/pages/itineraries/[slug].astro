@@ -1,0 +1,56 @@
+---
+import { getCollection, render } from 'astro:content';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import QuickFacts from '../../components/QuickFacts.astro';
+import { article, breadcrumb, touristTrip } from '../../lib/schema';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('itineraries');
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const d = entry.data;
+const { Content } = await render(entry);
+const url = `/itineraries/${entry.id}/`;
+
+const facts = [
+  { label: '所需時間', value: d.duration },
+  { label: '適合對象', value: d.audience },
+  { label: '路線', value: d.stops.join(' → ') },
+];
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '行程攻略', href: '/itineraries/' },
+  { name: d.name, href: url },
+];
+
+const jsonLd = [
+  breadcrumb(crumbs),
+  touristTrip({ name: d.name, description: d.description, url, stops: d.stops }),
+  article({
+    headline: d.name,
+    description: d.description,
+    image: d.heroImage,
+    url,
+    author: d.editor,
+  }),
+];
+---
+
+<ArticleLayout
+  title={d.title}
+  description={d.description}
+  h1={d.h1}
+  oneLiner={d.oneLiner}
+  heroImage={d.heroImage}
+  heroAlt={d.heroAlt}
+  editor={d.editor}
+  lastVerifiedAt={d.lastVerifiedAt}
+  breadcrumbs={crumbs}
+  jsonLd={jsonLd}
+>
+  <QuickFacts slot="before" rows={facts} title="行程資訊" />
+  <Content />
+</ArticleLayout>

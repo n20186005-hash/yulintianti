@@ -1,0 +1,47 @@
+---
+import { getCollection, render } from 'astro:content';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import { article, breadcrumb } from '../../lib/schema';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('food');
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const d = entry.data;
+const { Content } = await render(entry);
+const url = `/food/${entry.id}/`;
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '美食地圖', href: '/food/' },
+  { name: d.name, href: url },
+];
+
+const jsonLd = [
+  breadcrumb(crumbs),
+  article({
+    headline: d.name,
+    description: d.description,
+    image: d.heroImage,
+    url,
+    author: d.editor,
+  }),
+];
+---
+
+<ArticleLayout
+  title={d.title}
+  description={d.description}
+  h1={d.h1}
+  oneLiner={d.oneLiner}
+  heroImage={d.heroImage}
+  heroAlt={d.heroAlt}
+  editor={d.editor}
+  lastVerifiedAt={d.lastVerifiedAt}
+  breadcrumbs={crumbs}
+  jsonLd={jsonLd}
+>
+  <Content />
+</ArticleLayout>

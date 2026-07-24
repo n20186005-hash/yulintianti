@@ -1,0 +1,46 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Card from '../../components/Card.astro';
+import { breadcrumb, website } from '../../lib/schema';
+
+const entries = (await getCollection('food')).sort(
+  (a, b) => a.data.order - b.data.order
+);
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '美食地圖', href: '/food/' },
+];
+const jsonLd = [website(), breadcrumb(crumbs)];
+---
+
+<BaseLayout
+  title="南寮漁港美食地圖｜海鮮、小吃、咖啡與親子餐廳"
+  description="南寮漁港美食地圖，分類整理海鮮餐廳、市集小吃、看海咖啡與親子友善餐廳的挑選重點，看夕陽前後都好安排。"
+  jsonLd={jsonLd}
+>
+  <div class="mx-auto max-w-6xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">南寮漁港美食地圖</h1>
+    <p class="mt-3 max-w-2xl text-ink/75">
+      我們不做付費排名，也不製作評分，只整理各類型的挑選重點，幫你在南寮吃得安心。
+    </p>
+
+    <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        entries.map((e) => (
+          <Card
+            href={`/food/${e.id}/`}
+            image={e.data.heroImage}
+            alt={e.data.heroAlt}
+            title={e.data.name}
+            desc={e.data.oneLiner}
+            tag={e.data.category}
+          />
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

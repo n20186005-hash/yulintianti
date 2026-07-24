@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '隱私權政策', href: '/privacy/' },
+];
+---
+
+<BaseLayout
+  title="隱私權與 Cookie 說明｜南寮魚鱗天梯"
+  description="南寮魚鱗天梯的隱私權政策與 Cookie 說明，說明我們如何處理流量分析、外部服務與你的個人資料。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">隱私權與 Cookie 說明</h1>
+    <div class="prose-cn mt-6">
+      <h2>我們蒐集什麼</h2>
+      <p>本站為靜態資訊網站，沒有會員登入、沒有線上預訂，不主動蒐集你的姓名或聯絡資訊，除非你主動來信。</p>
+      <h2>流量分析</h2>
+      <p>我們可能使用注重隱私的網站流量分析（例如 Cloudflare Web Analytics），以了解頁面瀏覽概況；此類工具不需 Cookie、不建立跨站追蹤。若改用 GA4，會於本頁更新說明。</p>
+      <h2>外部服務</h2>
+      <ul>
+        <li>地圖：OpenStreetMap 內嵌地圖；導航會開啟 Google 地圖。</li>
+        <li>外部連結：中央氣象署、新竹市政府等官方網站，其隱私政策以各站為準。</li>
+      </ul>
+      <h2>Cookie</h2>
+      <p>本站核心功能不依賴 Cookie。若未來加入需要 Cookie 的服務，會在此更新並提供選擇。</p>
+      <h2>聯絡</h2>
+      <p>對隱私有疑問，請見<a href="/contact/">聯絡我們</a>。</p>
+    </div>
+  </div>
+</BaseLayout>

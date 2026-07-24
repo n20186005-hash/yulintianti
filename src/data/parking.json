@@ -1,0 +1,35 @@
+[
+  {
+    "name": "南寮漁港第一停車場",
+    "slug": "nanliao-p1",
+    "latitude": 24.8549,
+    "longitude": 120.9262,
+    "vehicleTypes": ["car"],
+    "pricingText": "以現場公告為準（假日常收費）",
+    "walkMinutesToStairs": 8,
+    "note": "最靠近波光市集與旅客服務中心，假日午後最快滿。",
+    "lastVerifiedAt": "2026-07-24"
+  },
+  {
+    "name": "南寮漁港第二停車場",
+    "slug": "nanliao-p2",
+    "latitude": 24.8572,
+    "longitude": 120.9248,
+    "vehicleTypes": ["car"],
+    "pricingText": "以現場公告為準",
+    "walkMinutesToStairs": 12,
+    "note": "靠近親子沙灘與大草坪，車位較多，走到魚鱗天梯稍遠。",
+    "lastVerifiedAt": "2026-07-24"
+  },
+  {
+    "name": "機車停車區",
+    "slug": "nanliao-moto",
+    "latitude": 24.8555,
+    "longitude": 120.9258,
+    "vehicleTypes": ["motorcycle"],
+    "pricingText": "多為免費，以現場公告為準",
+    "walkMinutesToStairs": 6,
+    "note": "分散於漁港周邊路側，請依標線停放。",
+    "lastVerifiedAt": "2026-07-24"
+  }
+]

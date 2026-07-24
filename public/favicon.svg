@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="南寮魚鱗天梯">
+  <rect width="64" height="64" rx="12" fill="#163B4D"/>
+  <circle cx="32" cy="28" r="13" fill="#E99A59"/>
+  <g fill="none" stroke="#F1F0EB" stroke-width="2.6" stroke-linecap="round">
+    <path d="M15 32 a8 8 0 0 1 16 0"/>
+    <path d="M31 32 a8 8 0 0 1 16 0"/>
+    <path d="M23 40 a8 8 0 0 1 16 0"/>
+  </g>
+  <path d="M8 50 q8 -6 16 0 t16 0 t16 0" fill="none" stroke="#6C9AAA" stroke-width="3.4" stroke-linecap="round"/>
+</svg>

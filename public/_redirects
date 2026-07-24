@@ -1,0 +1,6 @@
+# Cloudflare Pages 轉址規則
+# 將 www 永久 301 轉至裸網域（apex）
+https://www.yulintianti.com/* https://yulintianti.com/:splat 301!
+# 舊網域永久轉至新網域（需保留舊網域綁定才會生效）
+https://nanliaotianti.com/* https://yulintianti.com/:splat 301!
+https://www.nanliaotianti.com/* https://yulintianti.com/:splat 301!

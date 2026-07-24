@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 64" role="img" aria-label="南寮魚鱗天梯">
+  <defs>
+    <clipPath id="sea"><rect x="0" y="0" width="64" height="64"/></clipPath>
+  </defs>
+  <g clip-path="url(#sea)">
+    <!-- 半圓夕陽 -->
+    <circle cx="32" cy="30" r="15" fill="#E99A59"/>
+    <!-- 層疊魚鱗 -->
+    <g fill="none" stroke="#163B4D" stroke-width="2.4" stroke-linecap="round">
+      <path d="M14 34 a8 8 0 0 1 16 0"/>
+      <path d="M30 34 a8 8 0 0 1 16 0"/>
+      <path d="M22 42 a8 8 0 0 1 16 0"/>
+    </g>
+    <!-- 海浪曲線 -->
+    <path d="M6 52 q8 -6 16 0 t16 0 t16 0 t16 0" fill="none" stroke="#6C9AAA" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <g font-family="-apple-system, 'Noto Sans TC', sans-serif">
+    <text x="74" y="32" font-size="21" font-weight="700" fill="#163B4D">南寮魚鱗天梯</text>
+    <text x="75" y="50" font-size="8" letter-spacing="1.2" fill="#6C9AAA">NANLIAO YULIN TIANTI</text>
+  </g>
+</svg>

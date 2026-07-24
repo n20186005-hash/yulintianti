@@ -1,0 +1,46 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Card from '../components/Card.astro';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '最新整理', href: '/news/' },
+];
+const guides = (await getCollection('guides')).sort(
+  (a, b) => a.data.order - b.data.order
+);
+---
+
+<BaseLayout
+  title="南寮魚鱗天梯最新整理｜新資訊與實用文章"
+  description="南寮魚鱗天梯最新整理，彙整新發布的實用文章與資訊更新，包含旅遊攻略與行前準備。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-5xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">最新整理</h1>
+    <p class="mt-3 text-ink/75">新發布與更新的實用文章，會陸續補充。</p>
+
+    <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        guides.map((e) => (
+          <Card
+            href={`/guides/${e.id}/`}
+            image={e.data.heroImage}
+            alt={e.data.heroAlt}
+            title={e.data.name}
+            desc={e.data.oneLiner}
+          />
+        ))
+      }
+    </div>
+
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href="/guides/" class="rounded-full border border-deepsea px-4 py-2 text-sm font-semibold text-deepsea hover:bg-scale">旅遊攻略</a>
+      <a href="/events/" class="rounded-full border border-deepsea px-4 py-2 text-sm font-semibold text-deepsea hover:bg-scale">活動快訊</a>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import parking from '../data/parking.json';
+import { breadcrumb } from '../lib/schema';
+import { NAV_DEST_URL } from '../data/site.js';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '停車', href: '/parking/' },
+];
+const nav = (lat: number, lng: number) =>
+  `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+---
+
+<BaseLayout
+  title="南寮魚鱗天梯停車攻略｜停車場位置與步行路線"
+  description="南寮魚鱗天梯停車攻略，整理第一、第二停車場與機車停車區位置、步行距離與假日尖峰建議，並提供導航連結。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">南寮魚鱗天梯停車攻略</h1>
+    <p class="mt-3 text-ink/75">
+      南寮漁港停車位不少，但假日午後尖峰容易滿。以下整理各停車場位置與步行距離。
+    </p>
+
+    <div class="mt-6 space-y-4">
+      {
+        parking.map((p) => (
+          <div class="rounded-2xl border border-scale bg-white p-5">
+            <div class="flex items-start justify-between gap-3">
+              <h2 class="text-lg font-bold text-deepsea">{p.name}</h2>
+              <a
+                href={nav(p.latitude, p.longitude)}
+                target="_blank"
+                rel="noopener"
+                class="shrink-0 rounded-full bg-deepsea px-3 py-1.5 text-sm font-semibold text-white hover:bg-ink"
+              >
+                導航
+              </a>
+            </div>
+            <dl class="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+              <div><dt class="text-ink/55">可停車種</dt><dd class="font-medium">{p.vehicleTypes.map((v) => (v === 'car' ? '汽車' : '機車')).join('、')}</dd></div>
+              <div><dt class="text-ink/55">步行到天梯</dt><dd class="font-medium">約 {p.walkMinutesToStairs} 分鐘</dd></div>
+              <div><dt class="text-ink/55">收費</dt><dd class="font-medium">{p.pricingText}</dd></div>
+            </dl>
+            <p class="mt-3 text-sm text-ink/75">{p.note}</p>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="prose-cn mt-8">
+      <h2>停車小提醒</h2>
+      <ul>
+        <li>假日建議下午 3 點前抵達，或直接停第二停車場再散步過去。</li>
+        <li>收費方式以現場公告為準，價格可能調整。</li>
+        <li>不確定路線可先用<a href={NAV_DEST_URL} target="_blank" rel="noopener">導航到南寮魚鱗天梯</a>。</li>
+      </ul>
+    </div>
+  </div>
+</BaseLayout>

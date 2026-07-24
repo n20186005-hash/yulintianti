@@ -1,0 +1,51 @@
+---
+import { tide } from '../lib/tide';
+import { relativeDayLabel } from '../lib/format';
+
+interface Props {
+  days?: number;
+}
+const { days = 7 } = Astro.props;
+const list = tide.days.slice(0, days);
+const typeLabel = (t: string) => (t === 'high' ? '滿潮' : '乾潮');
+---
+
+<div class="overflow-x-auto rounded-xl border border-scale">
+  <table class="w-full min-w-[520px] border-collapse text-sm">
+    <caption class="sr-only">{tide.station}潮汐預報</caption>
+    <thead>
+      <tr class="bg-deepsea text-left text-white">
+        <th class="px-4 py-3 font-semibold">天數</th>
+        <th class="px-4 py-3 font-semibold">潮汐時間與水位（公尺）</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        list.map((d, i) => (
+          <tr class:list={[i % 2 ? 'bg-scale/50' : 'bg-white']}>
+            <td class="whitespace-nowrap px-4 py-3 font-medium text-deepsea align-top">
+              {relativeDayLabel(i)}
+            </td>
+            <td class="px-4 py-3">
+              <ul class="flex flex-wrap gap-x-5 gap-y-1">
+                {d.events.map((e) => (
+                  <li class="whitespace-nowrap">
+                    <span class:list={['inline-block w-9 rounded px-1 text-center text-xs font-semibold', e.type === 'high' ? 'bg-coast/25 text-deepsea' : 'bg-sunset/25 text-ink']}>
+                      {typeLabel(e.type)}
+                    </span>
+                    <span class="ml-1 font-medium">{e.time}</span>
+                    <span class="ml-1 text-ink/50">{e.heightM}m</span>
+                  </li>
+                ))}
+              </ul>
+            </td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+<p class="mt-3 text-xs text-ink/55">
+  資料來源：{tide.source}。基準：{tide.datum}。此為代表性每日潮汐示意，
+  實際潮汐與確切時間請以 <a href="https://www.cwa.gov.tw/V8/C/T/Marine.html" target="_blank" rel="noopener" class="underline">中央氣象署潮汐預報</a> 為準。
+</p>

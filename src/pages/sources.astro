@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '資料來源', href: '/sources/' },
+];
+const sources = [
+  { label: '新竹市政府觀光旅遊網', href: 'https://tourism.hccg.gov.tw/', note: '景點、活動與海岸線資訊' },
+  { label: '新竹市政府香山濕地生態網（魚鱗天梯介紹）', href: 'https://ssw.hccg.gov.tw/', note: '魚鱗天梯工程性質與定位' },
+  { label: '中央氣象署', href: 'https://www.cwa.gov.tw/', note: '天氣、風力、浪高與潮汐' },
+  { label: '中央氣象署氣象資料開放平臺', href: 'https://opendata.cwa.gov.tw/', note: '潮汐與沿海預報 API' },
+];
+---
+
+<BaseLayout
+  title="資料來源｜南寮魚鱗天梯引用的官方與公開資料"
+  description="南寮魚鱗天梯引用的資料來源清單，包含新竹市政府觀光旅遊網與中央氣象署等官方與公開資料。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">資料來源</h1>
+    <p class="mt-3 text-ink/75">本站主要引用下列官方與公開資料，並以此為查核依據。</p>
+    <ul class="mt-6 space-y-4">
+      {
+        sources.map((s) => (
+          <li class="rounded-xl border border-scale bg-white p-4">
+            <a href={s.href} target="_blank" rel="noopener" class="font-semibold text-deepsea underline">{s.label}</a>
+            <p class="mt-1 text-sm text-ink/70">{s.note}</p>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="mt-6 text-sm text-ink/60">圖片來源與授權，另見<a href="/image-credits/" class="underline">圖片授權</a>。</p>
+  </div>
+</BaseLayout>

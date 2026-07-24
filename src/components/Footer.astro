@@ -1,0 +1,40 @@
+---
+import { SITE, FOOTER_NAV } from '../data/site.js';
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-16 bg-deepsea text-scale">
+  <div class="mx-auto max-w-6xl px-4 py-12">
+    <div class="grid gap-8 md:grid-cols-5">
+      <div class="md:col-span-1">
+        <div class="text-lg font-bold text-white">{SITE.name}</div>
+        <p class="mt-2 text-sm text-coast">{SITE.slogan}</p>
+      </div>
+
+      {
+        FOOTER_NAV.map((group) => (
+          <div>
+            <div class="text-sm font-semibold text-white">{group.title}</div>
+            <ul class="mt-3 space-y-2">
+              {group.links.map((l) => (
+                <li>
+                  <a href={l.href} class="text-sm text-scale/85 hover:text-sunset transition-colors">
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="mt-10 flex flex-col gap-2 border-t border-coast/20 pt-6 text-xs text-scale/70 sm:flex-row sm:items-center sm:justify-between">
+      <p>© {year} {SITE.name}. 版權所有。</p>
+      <p>
+        本站部分照片來自維基共享資源，採 CC 授權，詳見
+        <a href="/image-credits/" class="underline hover:text-sunset">圖片授權</a>。
+      </p>
+    </div>
+  </div>
+</footer>

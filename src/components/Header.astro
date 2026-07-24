@@ -1,0 +1,82 @@
+---
+import { SITE, NAV, NAV_DEST_URL } from '../data/site.js';
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path.startsWith(href);
+const navUrl = NAV_DEST_URL;
+---
+
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-scale">
+  <div class="mx-auto max-w-6xl px-4">
+    <div class="flex h-16 items-center justify-between gap-4">
+      <a href="/" class="flex items-center shrink-0" aria-label={`${SITE.name} 首頁`}>
+        <img src="/logo.svg" alt={SITE.name} width="180" height="52" class="h-10 w-auto" />
+      </a>
+
+      <nav class="hidden md:flex items-center gap-1" aria-label="主選單">
+        {
+          NAV.map((item) => (
+            <a
+              href={item.href}
+              class:list={[
+                'px-3 py-2 rounded-md text-[15px] font-medium transition-colors hover:bg-scale',
+                isActive(item.href) ? 'text-sunset' : 'text-ink',
+              ]}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <a
+          href={navUrl}
+          target="_blank"
+          rel="noopener"
+          class="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-deepsea px-4 py-2 text-sm font-semibold text-white hover:bg-ink transition-colors"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7-6.5-7-11a7 7 0 1 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          立即導航
+        </a>
+        <button
+          id="nav-toggle"
+          class="md:hidden inline-flex items-center justify-center rounded-md p-2 text-deepsea hover:bg-scale"
+          aria-label="開啟選單"
+          aria-expanded="false"
+          aria-controls="mobile-nav"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <nav id="mobile-nav" class="md:hidden hidden pb-4" aria-label="行動版選單">
+      <div class="grid grid-cols-2 gap-2">
+        {
+          NAV.map((item) => (
+            <a
+              href={item.href}
+              class:list={[
+                'rounded-md border border-scale px-3 py-2.5 text-center text-sm font-medium',
+                isActive(item.href) ? 'bg-deepsea text-white' : 'bg-white text-ink',
+              ]}
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const btn = document.getElementById('nav-toggle');
+  const menu = document.getElementById('mobile-nav');
+  btn?.addEventListener('click', () => {
+    const open = menu?.classList.toggle('hidden');
+    btn.setAttribute('aria-expanded', String(open === false));
+  });
+</script>

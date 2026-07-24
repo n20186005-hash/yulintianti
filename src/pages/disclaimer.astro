@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { breadcrumb } from '../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '免責聲明', href: '/disclaimer/' },
+];
+---
+
+<BaseLayout
+  title="安全與免責聲明｜南寮魚鱗天梯"
+  description="南寮魚鱗天梯的安全與免責聲明，說明天氣潮汐等資訊為預報、海岸活動的安全注意事項，以及資訊使用的免責範圍。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">安全與免責聲明</h1>
+    <div class="prose-cn mt-6">
+      <h2>資訊性質</h2>
+      <p>本站提供的天氣、風速、潮汐、日落、營業時間與交通等資訊，多為預報或整理資料，可能與實際狀況不同，僅供行前參考，不構成任何保證。</p>
+      <h2>海岸安全</h2>
+      <ul>
+        <li>颱風、大浪或發布海象警示時，請勿進入魚鱗天梯靠海下層階梯。</li>
+        <li>階梯無護欄、靠海側溼滑，帶小孩請全程牽好。</li>
+        <li>請遵守現場封鎖、警示與工作人員指示，量力而為。</li>
+      </ul>
+      <h2>免責範圍</h2>
+      <p>使用本站資訊所作之行程與決策，風險由使用者自行承擔。對於因資訊變動、誤差或不可抗力造成的損失，本站不負賠償責任。</p>
+      <h2>網站定位</h2>
+      <p>關於本站的定位與內容範圍，請見<a href="/about/">關於本站</a>。</p>
+    </div>
+  </div>
+</BaseLayout>

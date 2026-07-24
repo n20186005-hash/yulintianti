@@ -1,0 +1,196 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import TodayStatus from '../components/TodayStatus.astro';
+import LiveWeather from '../components/LiveWeather.astro';
+import QuickFacts from '../components/QuickFacts.astro';
+import PlaceMap from '../components/PlaceMap.astro';
+import Card from '../components/Card.astro';
+import { SITE } from '../data/site.js';
+import places from '../data/places.json';
+import {
+  website,
+  organization,
+  touristAttraction,
+  faqPage,
+} from '../lib/schema';
+
+const facts = [
+  { label: '地址', value: '新竹市北區新港北路' },
+  { label: '門票', value: '免費' },
+  { label: '建議停留', value: '30 至 60 分鐘' },
+  { label: '最佳時間', value: '日落前 60 至 90 分鐘' },
+  { label: '適合族群', value: '情侶、親子、攝影、單車' },
+  { label: '無障礙', value: '上層步道可觀景，下層階梯不便' },
+  { label: '寵物', value: '戶外空間，請繫牽繩' },
+  { label: '夜間', value: '不建議進入靠海下層' },
+];
+
+const routes = [
+  {
+    href: '/itineraries/two-hours/',
+    image: '/images/harbor-scenery.jpg',
+    alt: '魚鱗天梯夕陽',
+    title: '兩小時夕陽版',
+    desc: '波光市集 → 國際風箏賽場 → 魚鱗天梯 → 看夕陽',
+    tag: '約 2 小時',
+  },
+  {
+    href: '/itineraries/family/',
+    image: '/images/seashell-park.jpg',
+    alt: '親子沙灘',
+    title: '親子半日版',
+    desc: '旅客服務中心 → 親子沙灘 → 放風箏 → 魚鱗天梯 → 晚餐',
+    tag: '約半日',
+  },
+  {
+    href: '/itineraries/one-day/',
+    image: '/images/coast-bridge.jpg',
+    alt: '17 公里海岸線',
+    title: '單車一日版',
+    desc: '南寮租車 → 魚鱗天梯 → 港南運河 → 香山濕地 → 返回南寮',
+    tag: '約一日',
+  },
+];
+
+const faqs = [
+  { q: '魚鱗天梯要門票嗎？', a: '免費，是全天開放的戶外海岸空間。' },
+  { q: '魚鱗天梯幾點去最好？', a: '建議日落前 60 至 90 分鐘抵達，兼顧散步、拍照與看夕陽。' },
+  { q: '退潮時還值得去嗎？', a: '值得，但海景會離階梯較遠，可改看消波結構或安排到市集用餐。' },
+  { q: '車停哪裡最方便？', a: '南寮漁港第一停車場最近，步行到階梯約 8 分鐘；假日午後容易滿，可改停第二停車場。' },
+];
+
+const jsonLd = [
+  website(),
+  organization(),
+  touristAttraction({
+    name: '南寮魚鱗天梯',
+    description:
+      '南寮魚鱗天梯是新竹漁港海岸的消波護岸階梯，遠看如魚鱗，是熱門的看海與夕陽拍照地點。',
+    image: '/images/harbor-scenery.jpg',
+    lat: SITE.geo.lat,
+    lng: SITE.geo.lng,
+    address: '新竹市北區新港北路',
+    url: '/',
+  }),
+  faqPage(faqs),
+];
+---
+
+<BaseLayout
+  title="南寮魚鱗天梯｜今日天氣、潮汐、夕陽與停車攻略"
+  description="南寮魚鱗天梯旅遊指南，整理今日天氣、風速、潮汐、日落時間、停車、交通、拍照位置，以及南寮漁港親子與半日遊行程。"
+  appendBrand={false}
+  jsonLd={jsonLd}
+>
+  <Hero
+    image="/images/harbor-scenery.jpg"
+    alt="新竹南寮魚鱗天梯海岸與夕陽"
+    h1="南寮魚鱗天梯：今天適合去嗎？"
+    subtitle="出發前先查看南寮風速、降雨、漲退潮和日落時間，再安排魚鱗天梯、南寮漁港與 17 公里海岸線行程。"
+    eager={true}
+    buttons={[
+      { label: '查看今日狀況', href: '/today/', primary: true },
+      { label: '查看潮汐', href: '/tide/' },
+      { label: '停車與導航', href: '/parking/' },
+      { label: '安排半日遊', href: '/itineraries/half-day/' },
+    ]}
+  />
+
+  <div class="mx-auto max-w-6xl px-4">
+    <!-- 今日狀況（全站最重要模組） -->
+    <section class="-mt-10 relative z-10">
+      <TodayStatus />
+    </section>
+
+    <!-- 即時天氣模組 -->
+    <section class="mt-6">
+      <LiveWeather context="home" />
+    </section>
+
+    <!-- 快速資訊卡 -->
+    <section class="mt-12 grid gap-8 lg:grid-cols-2">
+      <QuickFacts rows={facts} title="魚鱗天梯快速資訊" />
+      <div class="rounded-2xl border border-scale bg-white p-6">
+        <h2 class="text-lg">為什麼看南寮魚鱗天梯？</h2>
+        <p class="mt-3 text-ink/80">
+          我們不只介紹「魚鱗天梯是什麼」，更幫你回答出發前真正在意的問題：
+        </p>
+        <ul class="mt-3 space-y-2 text-ink/80">
+          <li>· 今天適合去嗎？現在風會不會太大？</li>
+          <li>· 今天幾點看夕陽？幾點漲潮、退潮？</li>
+          <li>· 車停哪裡最方便？帶小孩可以怎麼玩？</li>
+          <li>· 玩兩小時還是安排半日遊？附近還有什麼？</li>
+        </ul>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <a href="/weather/" class="rounded-full border border-deepsea px-4 py-2 text-sm font-semibold text-deepsea hover:bg-scale">天氣與海象</a>
+          <a href="/transport/" class="rounded-full border border-deepsea px-4 py-2 text-sm font-semibold text-deepsea hover:bg-scale">交通方式</a>
+          <a href="/photo-spots/" class="rounded-full border border-deepsea px-4 py-2 text-sm font-semibold text-deepsea hover:bg-scale">拍照位置</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 互動地圖 -->
+    <section class="mt-14">
+      <div class="flex items-end justify-between gap-3">
+        <h2 class="text-2xl">南寮漁港景點地圖</h2>
+        <a href="/map/" class="text-sm font-semibold text-deepsea underline">看完整地圖</a>
+      </div>
+      <div class="mt-5">
+        <PlaceMap height="360px" />
+      </div>
+    </section>
+
+    <!-- 三種推薦路線 -->
+    <section class="mt-14">
+      <div class="flex items-end justify-between gap-3">
+        <h2 class="text-2xl">三種推薦路線</h2>
+        <a href="/itineraries/" class="text-sm font-semibold text-deepsea underline">看更多行程</a>
+      </div>
+      <div class="mt-5 grid gap-6 md:grid-cols-3">
+        {routes.map((r) => <Card {...r} />)}
+      </div>
+    </section>
+
+    <!-- 南寮景點 -->
+    <section class="mt-14">
+      <div class="flex items-end justify-between gap-3">
+        <h2 class="text-2xl">南寮景點</h2>
+        <a href="/nanliao-harbor/" class="text-sm font-semibold text-deepsea underline">南寮漁港總覽</a>
+      </div>
+      <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          places.map((p) => (
+            <Card
+              href={`/${p.slug}/`}
+              image={p.image}
+              alt={p.name}
+              title={p.name}
+              desc={p.summary}
+            />
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- 常見問題 -->
+    <section class="mt-14 mb-4">
+      <h2 class="text-2xl">常見問題</h2>
+      <div class="mt-5 space-y-3">
+        {
+          faqs.map((f) => (
+            <details class="group rounded-xl border border-scale bg-white p-4">
+              <summary class="cursor-pointer list-none font-semibold text-deepsea marker:hidden">
+                <span class="inline-flex w-full items-center justify-between">
+                  {f.q}
+                  <span class="ml-2 text-sunset transition-transform group-open:rotate-45">＋</span>
+                </span>
+              </summary>
+              <p class="mt-2 text-ink/80">{f.a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</BaseLayout>

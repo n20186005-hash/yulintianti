@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="找不到頁面（404）"
+  description="找不到你要的頁面，回到首頁或看看南寮的熱門內容。"
+  noindex={true}
+>
+  <div class="mx-auto max-w-2xl px-4 py-20 text-center">
+    <p class="text-6xl font-bold text-sunset">404</p>
+    <h1 class="mt-4 text-2xl font-bold">找不到這個頁面</h1>
+    <p class="mt-3 text-ink/75">頁面可能已移動或不存在。試試以下熱門內容：</p>
+    <div class="mt-6 flex flex-wrap justify-center gap-3">
+      <a href="/" class="rounded-full bg-deepsea px-5 py-2.5 text-sm font-semibold text-white hover:bg-ink">回首頁</a>
+      <a href="/today/" class="rounded-full border border-deepsea px-5 py-2.5 text-sm font-semibold text-deepsea hover:bg-scale">今日狀況</a>
+      <a href="/yulin-tianti/" class="rounded-full border border-deepsea px-5 py-2.5 text-sm font-semibold text-deepsea hover:bg-scale">魚鱗天梯</a>
+      <a href="/itineraries/" class="rounded-full border border-deepsea px-5 py-2.5 text-sm font-semibold text-deepsea hover:bg-scale">行程攻略</a>
+    </div>
+  </div>
+</BaseLayout>
