@@ -34,6 +34,15 @@ const { title, description, image, type, noindex, jsonLd, appendBrand } = Astro.
       jsonLd={jsonLd}
       appendBrand={appendBrand}
     />
+    <!-- Google tag (gtag.js) -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-HXM22WWPKP"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-HXM22WWPKP');
+    </script>
     <!--
       Cloudflare Web Analytics：部署後於 Cloudflare 後台取得 token 後，
       取消下一行註解並填入 token 即可（無 Cookie、不需 GA4）。
