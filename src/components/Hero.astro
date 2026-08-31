@@ -4,7 +4,7 @@ interface Props {
   alt: string;
   h1: string;
   subtitle?: string;
-  buttons?: { label: string; href: string; primary?: boolean }[];
+  buttons?: { label: string; href: string; primary?: boolean; external?: boolean }[];
   eager?: boolean;
 }
 const { image, alt, h1, subtitle, buttons = [], eager = false } = Astro.props;
@@ -32,6 +32,8 @@ const { image, alt, h1, subtitle, buttons = [], eager = false } = Astro.props;
             {buttons.map((b) => (
               <a
                 href={b.href}
+                target={b.external ? '_blank' : undefined}
+                rel={b.external ? 'noopener' : undefined}
                 class:list={[
                   'rounded-full px-5 py-2.5 text-sm font-semibold transition-colors',
                   b.primary

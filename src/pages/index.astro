@@ -16,7 +16,9 @@ import {
 } from '../lib/schema';
 
 const facts = [
-  { label: '地址', value: '新竹市北區新港北路' },
+  { label: '地址', value: '新竹市北區新港路' },
+  { label: 'Plus Code', value: 'VW2F+WF' },
+  { label: 'Google 評分', value: '4.2（5,983 則評價）' },
   { label: '門票', value: '免費' },
   { label: '建議停留', value: '30 至 60 分鐘' },
   { label: '最佳時間', value: '日落前 60 至 90 分鐘' },
@@ -54,9 +56,12 @@ const routes = [
 ];
 
 const faqs = [
-  { q: '魚鱗天梯要門票嗎？', a: '免費，是全天開放的戶外海岸空間。' },
+  { q: '魚鱗天梯在哪裡？', a: '位於新竹市北區新港路（南寮漁港），Plus Code 為 VW2F+WF；在 Google 地圖搜尋「南寮魚鱗天梯」即可導航。' },
+  { q: '魚鱗天梯要門票嗎？', a: '免費，是全天開放的戶外海岸空間，不需預約。' },
   { q: '魚鱗天梯幾點去最好？', a: '建議日落前 60 至 90 分鐘抵達，兼顧散步、拍照與看夕陽。' },
-  { q: '退潮時還值得去嗎？', a: '值得，但海景會離階梯較遠，可改看消波結構或安排到市集用餐。' },
+  { q: '魚鱗天梯開放時間？', a: '戶外空間全天開放；夜間光線不足，不建議進入靠海下層階梯。' },
+  { q: '退潮時還值得去嗎？', a: '值得，但海景會離階梯較遠，可改看消波結構或安排到波光市集用餐。' },
+  { q: '魚鱗天梯附近還有什麼景點？', a: '步行可到南寮漁港與波光市集，再遠一點有親子沙灘、國際風箏賽場與 17 公里海岸線自行車道。' },
   { q: '車停哪裡最方便？', a: '南寮漁港第一停車場最近，步行到階梯約 8 分鐘；假日午後容易滿，可改停第二停車場。' },
 ];
 
@@ -70,8 +75,9 @@ const jsonLd = [
     image: '/images/harbor-scenery.jpg',
     lat: SITE.geo.lat,
     lng: SITE.geo.lng,
-    address: '新竹市北區新港北路',
+    address: '新竹市北區新港路',
     url: '/',
+    alternateName: SITE.alternateNames,
   }),
   faqPage(faqs),
 ];
@@ -94,6 +100,7 @@ const jsonLd = [
       { label: '查看潮汐', href: '/tide/' },
       { label: '停車與導航', href: '/parking/' },
       { label: '安排半日遊', href: '/itineraries/half-day/' },
+      { label: 'Google 地圖', href: SITE.mapsUrl, external: true },
     ]}
   />
 
@@ -130,6 +137,27 @@ const jsonLd = [
       </div>
     </section>
 
+    <!-- 認識南寮魚鱗天梯（SEO 實體語義：全稱＝簡稱、地理歸屬、周邊語義集群、權威外鏈） -->
+    <section class="mt-14" aria-labelledby="about-heading">
+      <div class="rounded-2xl border border-scale bg-white p-6 sm:p-8">
+        <h2 id="about-heading" class="text-2xl">關於南寮魚鱗天梯（新竹市北區）</h2>
+        <p class="mt-4 leading-relaxed text-ink/80">
+          <strong>南寮魚鱗天梯（Nanliao Stairway）</strong>位於<strong>新竹市</strong>北區新港路、南寮漁港海岸，是南寮一帶最受歡迎的海岸地標，一般習慣直接稱呼<strong>魚鱗天梯</strong>。它以消波塊層層堆疊成階梯狀護岸，兼具消波、護岸與觀景功能，也是新竹 17 公里海岸線起點附近最重要的看海、追夕陽與拍照景點。
+        </p>
+        <p class="mt-3 text-sm text-ink/65">
+          地理歸屬：南寮魚鱗天梯 → 新竹市北區 → 新竹市 → 臺灣（Taiwan，郵遞區號 300）
+        </p>
+        <p class="mt-3 leading-relaxed text-ink/80">
+          造訪<strong>南寮魚鱗天梯</strong>時，可順遊周邊核心地標<strong>南寮漁港（新竹漁港）</strong>與<strong>波光市集</strong>，再往北銜接親子沙灘、國際風箏賽場與 17 公里海岸線自行車道。
+        </p>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <a href={SITE.mapsUrl} target="_blank" rel="noopener" class="rounded-full bg-deepsea px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ink">在 Google 地圖開啟</a>
+          <a href="/transport/" class="rounded-full border border-deepsea px-4 py-2 text-sm font-semibold text-deepsea hover:bg-scale">交通方式</a>
+          <a href={SITE.govtTourismUrl} target="_blank" rel="noopener" class="rounded-full border border-deepsea px-4 py-2 text-sm font-semibold text-deepsea hover:bg-scale">{SITE.govtTourismLabel} ↗</a>
+        </div>
+      </div>
+    </section>
+
     <!-- 互動地圖 -->
     <section class="mt-14">
       <div class="flex items-end justify-between gap-3">
@@ -158,6 +186,9 @@ const jsonLd = [
         <h2 class="text-2xl">南寮景點</h2>
         <a href="/nanliao-harbor/" class="text-sm font-semibold text-deepsea underline">南寮漁港總覽</a>
       </div>
+      <p class="mt-2 text-sm text-ink/70">
+        魚鱗天梯周邊順遊：南寮漁港、波光市集、親子沙灘、國際風箏賽場與 17 公里海岸線。
+      </p>
       <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {
           places.map((p) => (

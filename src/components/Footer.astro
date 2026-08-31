@@ -32,6 +32,11 @@ const year = new Date().getFullYear();
     <div class="mt-10 flex flex-col gap-2 border-t border-coast/20 pt-6 text-xs text-scale/70 sm:flex-row sm:items-center sm:justify-between">
       <p>© {year} {SITE.name}. 版權所有。</p>
       <p>
+        官方資訊：
+        <a href={SITE.govtTourismUrl} target="_blank" rel="noopener" class="underline hover:text-sunset">{SITE.govtTourismLabel}</a>
+        ｜
+        <a href={SITE.mapsUrl} target="_blank" rel="noopener" class="underline hover:text-sunset">Google 地圖</a>
+        ｜
         本站部分照片來自維基共享資源，採 CC 授權，詳見
         <a href="/image-credits/" class="underline hover:text-sunset">圖片授權</a>。
       </p>

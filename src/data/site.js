@@ -17,6 +17,34 @@ export const SITE = {
     lat: 24.8522637,
     lng: 120.9237228,
   },
+
+  // —— SEO 實體綁定資料（JSON-LD / OG / 地圖 / 外鏈共用，勿散落硬編碼）——
+  // 景點全稱／簡稱：魚鱗天梯（域名 yulintianti 對應之意）
+  fullName: '南寮魚鱗天梯',
+  shortName: '魚鱗天梯',
+  englishName: 'Nanliao Stairway',
+  alternateNames: ['魚鱗天梯', 'Nanliao Stairway', '新竹魚鱗天梯'],
+  // 地理歸屬：新竹市北區・臺灣
+  regionName: '新竹市',
+  districtName: '北區',
+  countryName: '臺灣',
+  countryCode: 'TW',
+  postalCode: '300',
+  plusCode: 'VW2F+WF',
+  // Google 地圖地點連結（分享短連結 + iframe 嵌入 src）
+  mapsUrl: 'https://maps.app.goo.gl/PAGBgo7yN5czhQnJA',
+  mapsEmbedSrc:
+    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3620.339151156318!2d120.92372280000001!3d24.852263699999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x346834ec00a5e363%3A0x7b406f62e272f08d!2z5Y2X5a-u6bG86bOe5aSp5qKv!5e0!3m2!1szh-CN!2s!4v1788175559810!5m2!1szh-CN!2s',
+  // 周邊核心地標（周邊語義集群）
+  nearbyLandmarks: [
+    { name: '南寮漁港（新竹漁港）', href: '/nanliao-harbor/' },
+    { name: '波光市集', href: '/boguang-market/' },
+  ],
+  // 官方旅遊資訊（E-E-A-T 出站權威連結）
+  govtTourismUrl: 'https://tourism.hccg.gov.tw/',
+  govtTourismLabel: '新竹市政府觀光旅遊網',
+  // Google 地圖評價（僅用於頁面顯示參考，不加入 JSON-LD aggregateRating）
+  googleRating: { value: 4.2, count: 5983 },
 };
 
 // 全站統一的導航連結：使用 Google 地圖地點的精確座標，避免同名地點誤判

@@ -1,0 +1,19 @@
+{
+  "name": "南寮魚鱗天梯｜南寮漁港旅遊指南",
+  "short_name": "南寮魚鱗天梯",
+  "description": "南寮魚鱗天梯（新竹市北區）旅遊指南：今日天氣、風速、潮汐、日落、停車與交通，以及南寮漁港、波光市集等順遊景點資訊。",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#163B4D",
+  "theme_color": "#163B4D",
+  "lang": "zh-Hant-TW",
+  "categories": ["travel", "lifestyle"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

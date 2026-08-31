@@ -48,6 +48,14 @@ const { title, description, image, type, noindex, jsonLd, appendBrand } = Astro.
       取消下一行註解並填入 token 即可（無 Cookie、不需 GA4）。
       <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "YOUR_TOKEN"}'></script>
     -->
+
+    <!-- PWA：Web App Manifest 與行動端安裝支援 -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content={SITE.name} />
   </head>
   <body class="min-h-screen bg-white">
     <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded focus:bg-deepsea focus:px-3 focus:py-2 focus:text-white">跳至主要內容</a>
@@ -56,5 +64,13 @@ const { title, description, image, type, noindex, jsonLd, appendBrand } = Astro.
       <slot />
     </main>
     <Footer />
+    <script is:inline>
+      // PWA：註冊 Service Worker（離線快取）；本機開發（localhost）不啟用
+      if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
   </body>
 </html>

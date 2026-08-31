@@ -43,29 +43,38 @@ export function touristAttraction(opts: {
   lng: number;
   address?: string;
   url: string;
+  alternateName?: string[];
 }) {
   return {
     '@context': 'https://schema.org',
     '@type': 'TouristAttraction',
+    // 知識圖譜錨點：讓搜尋引擎將本頁綁定為該地理實體
+    '@id': abs(opts.url) + '#attraction',
     name: opts.name,
+    alternateName: opts.alternateName?.length
+      ? opts.alternateName
+      : [opts.name, `${SITE.regionName} ${opts.name}`],
     description: opts.description,
-    image: abs(opts.image),
     url: abs(opts.url),
+    image: [abs(opts.image)],
     isAccessibleForFree: true,
     geo: {
       '@type': 'GeoCoordinates',
       latitude: opts.lat,
       longitude: opts.lng,
     },
+    hasMap: SITE.mapsUrl,
     address: opts.address
       ? {
           '@type': 'PostalAddress',
-          addressLocality: '新竹市',
-          addressRegion: '臺灣',
           streetAddress: opts.address,
-          addressCountry: 'TW',
+          addressLocality: SITE.regionName,
+          addressRegion: SITE.countryName,
+          postalCode: SITE.postalCode,
+          addressCountry: SITE.countryCode,
         }
       : undefined,
+    sameAs: [SITE.mapsUrl, SITE.govtTourismUrl].filter(Boolean),
   };
 }
 
