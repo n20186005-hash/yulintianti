@@ -1,4 +1,6 @@
-// WMO 天氣代碼對照與提醒邏輯（繁體中文），供 /weather/ 前端使用
+// WMO 天氣代碼對照（繁體中文），供天氣模組使用。
+// 注意：天氣相關的「建議」與「風險提醒」邏輯統一放在 weather-advice.ts，
+// 本檔只負責代碼轉文字，避免同一組門檻散落在多個檔案。
 
 export type WxInfo = { label: string; emoji: string };
 
@@ -35,45 +37,4 @@ const WMO: Record<number, WxInfo> = {
 
 export function weatherInfo(code: number): WxInfo {
   return WMO[code] ?? { label: '未知', emoji: '❓' };
-}
-
-export type Alert = { level: 'danger' | 'warning'; text: string };
-
-// 針對雷雨、強風、高溫給出繁體中文提醒
-export function buildAlerts(input: {
-  weatherCode: number;
-  windMs: number;
-  gustMs: number;
-  apparentTemp: number;
-  todayWeatherCode?: number;
-  todayGustMax?: number;
-  todayTempMax?: number;
-}): Alert[] {
-  const alerts: Alert[] = [];
-  const thunder = [95, 96, 99];
-
-  if (thunder.includes(input.weatherCode) || (input.todayWeatherCode !== undefined && thunder.includes(input.todayWeatherCode))) {
-    alerts.push({
-      level: 'danger',
-      text: '雷雨提醒：可能有雷擊與強陣風，請勿在海邊或空曠處逗留，並遠離魚鱗天梯下層階梯。',
-    });
-  }
-
-  const gust = Math.max(input.gustMs, input.todayGustMax ?? 0);
-  if (input.windMs >= 10 || gust >= 14) {
-    alerts.push({
-      level: 'warning',
-      text: `強風提醒：平均風速約每秒 ${Math.round(input.windMs)} 公尺、陣風可達每秒 ${Math.round(gust)} 公尺，海邊體感更強，請勿靠近溼滑的下層階梯。`,
-    });
-  }
-
-  const heat = Math.max(input.apparentTemp, input.todayTempMax ?? -99);
-  if (heat >= 36) {
-    alerts.push({
-      level: input.apparentTemp >= 38 ? 'danger' : 'warning',
-      text: `高溫提醒：體感溫度約 ${Math.round(input.apparentTemp)}°C，請補充水分、做好防曬，避開正午時段。`,
-    });
-  }
-
-  return alerts;
 }

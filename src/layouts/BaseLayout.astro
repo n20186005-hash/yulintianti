@@ -4,6 +4,7 @@ import { SITE } from '../data/site.js';
 import Seo from '../components/Seo.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import MobileQuickBar from '../components/MobileQuickBar.astro';
 
 interface Props {
   title: string;
@@ -64,6 +65,9 @@ const { title, description, image, type, noindex, jsonLd, appendBrand } = Astro.
       <slot />
     </main>
     <Footer />
+    <!-- 行動端固定快捷列佔位，避免遮住頁尾內容 -->
+    <div class="h-16 md:hidden" aria-hidden="true"></div>
+    <MobileQuickBar />
     <script is:inline>
       // PWA：註冊 Service Worker（離線快取）；本機開發（localhost）不啟用
       if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {

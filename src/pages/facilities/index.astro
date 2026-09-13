@@ -1,0 +1,157 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import SourceBlock from '../../components/SourceBlock.astro';
+import { breadcrumb, faqPage } from '../../lib/schema';
+import facilities from '../../data/facilities.json';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '訪客服務與設施', href: '/facilities/' },
+];
+
+const faqs = [
+  {
+    q: '南寮魚鱗天梯附近有洗手間嗎？',
+    a: '有。公共洗手間多集中在漁港停車場、港區服務空間與市集周邊，通常設有無障礙與親子廁所；但魚鱗天梯下層階梯與消波塊一帶沒有廁所，建議先在港區使用。',
+  },
+  {
+    q: '開車前往要停哪裡？',
+    a: '港區周邊有多處收費停車場，步行至魚鱗天梯約 5 至 15 分鐘。連續假日與風箏活動期間車位容易客滿，建議上午或日落前 2 小時抵達，或改停外圍停車場再步行。',
+  },
+  {
+    q: '附近吃東西方便嗎？價位大概如何？',
+    a: '港區周邊以海鮮餐廳、小吃、咖啡輕食與便利商店為主，價位落差大。海鮮餐廳多採時價計費，點餐前建議先確認計價方式、低消與服務費。',
+  },
+  {
+    q: '住宿要訂在南寮還是新竹市區？',
+    a: '南寮在地住宿以民宿與小型旅宿為主、數量有限。若重視機能與大眾運輸，建議選擇新竹市區住宿，再以公車或計程車前往，車程約 15 至 20 分鐘。',
+  },
+  {
+    q: '輪椅或嬰兒車可以到魚鱗天梯嗎？',
+    a: '港區與上層步道多為平坦路面，輪椅與嬰兒車可通行並遠觀海景；但魚鱗天梯本身為階梯結構，下層與鬆軟沙灘不適合推車與輪椅。',
+  },
+  {
+    q: '有加油站或電動車充電樁嗎？',
+    a: '港區內沒有加油站，需在聯外主要道路沿線（如台 15 線、台 61 線）補給。電動車充電樁以新竹市區與大型停車場為主，港區資源有限，出發前請先確認電量。',
+  },
+];
+
+const related = [
+  { label: '停車攻略', href: '/parking/', note: '各停車場位置、步行時間與費率' },
+  { label: '交通方式', href: '/transport/', note: '開車、公車、單車與計程車比較' },
+  { label: '美食地圖', href: '/food/', note: '餐飲類型與用餐時段說明' },
+  { label: '人群定制方案', href: '/audiences/', note: '親子、攝影與低體力族群的動線' },
+];
+---
+
+<BaseLayout
+  title="南寮魚鱗天梯訪客服務與周邊設施｜洗手間、停車、餐飲、住宿與補給"
+  description="南寮魚鱗天梯與南寮漁港周邊設施總整理：公共洗手間、停車場、餐飲類型、住宿安排、便利商店與超市、加油與電動車充電、提款藥局、無障礙與寵物規範。"
+  jsonLd={[breadcrumb(crumbs), faqPage(faqs)]}
+>
+  <div class="mx-auto max-w-4xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">訪客服務與周邊設施</h1>
+    <p class="mt-3 leading-relaxed text-ink/80">
+      這一頁把到訪<strong>南寮魚鱗天梯</strong>與<strong>南寮漁港</strong>之前最常需要確認的設施一次整理：洗手間、停車、飲食、住宿、補給、加油充電，以及無障礙與寵物規範。內容以「設施類型」說明，協助你判斷行程可行性，不代表任何特定店家。
+    </p>
+    <p class="mt-2 text-sm text-ink/60">彙整時間：{facilities.updatedNote}｜設施位置與開放時間可能變動，請以現場標示為準。</p>
+
+    <section class="mt-8">
+      <h2 class="text-2xl">設施速查表</h2>
+      <div class="mt-4 overflow-x-auto rounded-xl border border-scale">
+        <table class="w-full min-w-[560px] border-collapse text-sm">
+          <thead>
+            <tr class="bg-deepsea text-left text-white">
+              <th class="px-4 py-3 font-semibold">設施類型</th>
+              <th class="px-4 py-3 font-semibold">供應概況</th>
+              <th class="px-4 py-3 font-semibold">備註</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              facilities.quickTable.map((r, i) => (
+                <tr class:list={[i % 2 ? 'bg-scale/50' : 'bg-white']}>
+                  <td class="whitespace-nowrap px-4 py-2.5 font-medium text-deepsea">{r.type}</td>
+                  <td class="px-4 py-2.5">{r.supply}</td>
+                  <td class="px-4 py-2.5 text-ink/70">{r.note}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">各項設施詳細說明</h2>
+      <div class="mt-5 space-y-5">
+        {
+          facilities.groups.map((g) => (
+            <article class="rounded-2xl border border-scale bg-white p-5 sm:p-6">
+              <h3 class="flex items-center gap-2 text-lg font-semibold text-deepsea">
+                <span aria-hidden="true">{g.emoji}</span>
+                {g.title}
+              </h3>
+              <p class="mt-2 text-sm leading-relaxed text-ink/75">{g.summary}</p>
+              <dl class="mt-4 grid gap-3 sm:grid-cols-3">
+                {g.items.map((it) => (
+                  <div class="rounded-xl bg-scale/60 p-3.5">
+                    <dt class="text-sm font-semibold text-deepsea">{it.label}</dt>
+                    <dd class="mt-1 text-sm leading-relaxed text-ink/75">{it.detail}</dd>
+                  </div>
+                ))}
+              </dl>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-10 rounded-2xl border border-coast/30 bg-scale/40 p-5 sm:p-6">
+      <h2 class="text-xl">中立立場說明</h2>
+      <p class="mt-2 text-sm leading-relaxed text-ink/75">{facilities.neutralStatement}</p>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">延伸閱讀</h2>
+      <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+        {
+          related.map((r) => (
+            <li class="rounded-xl border border-scale bg-white p-4">
+              <a href={r.href} class="font-semibold text-deepsea underline hover:text-sunset">{r.label}</a>
+              <p class="mt-1 text-sm text-ink/70">{r.note}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">常見問題</h2>
+      <div class="mt-4 space-y-5">
+        {
+          faqs.map((f) => (
+            <div>
+              <h3 class="text-base font-semibold text-deepsea">{f.q}</h3>
+              <p class="mt-1.5 leading-relaxed text-ink/80">{f.a}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <SourceBlock
+      sources={[
+        { label: '新竹市政府觀光旅遊網', href: 'https://tourism.hccg.gov.tw/' },
+        { label: '新竹市政府（新竹漁港／南寮漁港相關公告）', href: 'https://www.hccg.gov.tw/' },
+        {
+          label: 'Google 地圖（公共設施與周邊服務類型）',
+          href: 'https://maps.app.goo.gl/PAGBgo7yN5czhQnJA',
+        },
+        { label: '交通部觀光署', href: 'https://www.taiwan.net.tw/' },
+      ]}
+    />
+  </div>
+</BaseLayout>

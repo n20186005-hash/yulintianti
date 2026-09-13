@@ -26,10 +26,17 @@ const {
 // 每頁唯一 canonical，統一小寫、含尾斜線
 const canonical = new URL(Astro.url.pathname, SITE.url).href;
 const ogImageAbs = new URL(image, SITE.url).href;
+
+// 品牌字尾「｜南寮魚鱗天梯」共 7 字；標題加上後超過 30 字就會被搜尋結果截斷，
+// 反而稀釋前面的主要關鍵字，因此過長時不加字尾（品牌仍見於網站名稱與 H1）。
+const BRAND_SUFFIX = `｜${SITE.name}`;
+const MAX_TITLE_LENGTH = 30;
 const fullTitle =
-  !appendBrand || title === SITE.fullName || title.includes(SITE.name)
+  !appendBrand || title === SITE.siteTitle || title.includes(SITE.name)
     ? title
-    : `${title}｜${SITE.name}`;
+    : title.length + BRAND_SUFFIX.length <= MAX_TITLE_LENGTH
+      ? `${title}${BRAND_SUFFIX}`
+      : title;
 ---
 
 <title>{fullTitle}</title>

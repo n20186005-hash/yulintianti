@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Cloudflare Workers 部署設定（Astro 靜態資產 + 邊緣即時渲染）
+  "name": "yulintianti",
+  "compatibility_date": "2025-05-21",
+  "compatibility_flags": ["nodejs_compat"],
+  // Astro 產出的 Worker 入口（astro build 後生成）
+  "main": "dist/_worker.js/index.js",
+  // 靜態頁面與資源；未命中資產的請求交由 Worker 處理（例如伺服器島嶼）
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    // 伺服器島嶼 props 加解密用；與建置期 .env 的 ASTRO_KEY 保持一致
+    "ASTRO_KEY": "wPaYPapa6AohD1VFMrXPEy8q0I0Jr8jHssP+9mVwm9Q="
+  }
+}

@@ -2,56 +2,199 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import LiveWeather from '../components/LiveWeather.astro';
-import { breadcrumb } from '../lib/schema';
+import ServerIslandFallback from '../components/ServerIslandFallback.astro';
+import { breadcrumb, faqPage } from '../lib/schema';
 
 const crumbs = [
   { name: '首頁', href: '/' },
   { name: '天氣與海象', href: '/weather/' },
 ];
+
+const faqs = [
+  {
+    q: '南寮魚鱗天梯今天的天氣怎麼查？',
+    a: '本頁上方即時模組會依現況直接給出建議：先看是否有風險提醒，再看「出行穿搭／遊玩安排／隨身物品」三個區塊該怎麼準備，最後才是氣溫、風速、降雨機率、浪高與水溫等數據，並可對照潮汐與日落時間安排出發時刻。',
+  },
+  {
+    q: '「降雨機率 60%」代表一定會下雨嗎？',
+    a: '不代表。機率指的是該時段下雨的可能性，本站只會提醒「有機會下雨、建議帶雨具」，不會寫成一定會下雨。若機率偏高，建議把行程排得寬鬆一些並準備室內備案。',
+  },
+  {
+    q: '什麼樣的風速不建議前往下層階梯？',
+    a: '平均風速達每秒 8 公尺（約 5 級）就建議待在上層步道；達每秒 12 公尺（約 6 級）以上，或陣風達每秒 18 公尺以上時，浪花容易濺上階梯，建議改期或只在安全處短暫停留；有海警或現場封鎖時請勿進入。',
+  },
+  {
+    q: '浪高幾公尺算危險？',
+    a: '浪高 1 公尺以下通常平穩；1 至 1.5 公尺時建議與礁石、浪區保持距離；超過 1.5 公尺建議只待在上層步道；達 2.5 公尺以上屬大浪，不建議靠近海岸。長浪可能突然出現，即使當天晴朗也要留意。',
+  },
+  {
+    q: '下雨天還值得去嗎？',
+    a: '短暫陣雨或雨後放晴常有較好的天空層次與較少人潮；但雷雨、強降雨或浪高偏大時應避免靠近海岸，可改走雨天備案行程。',
+  },
+  {
+    q: '為什麼海邊風比市區大？',
+    a: '海岸缺少建築物與地形遮蔽，加上新竹冬季東北季風受地形影響常明顯增強，因此同一時間海邊風速往往高於市區，體感溫度也會更低。',
+  },
+];
+
+// 平均風速對照（含蒲福風級），門檻與建議引擎一致
+const windRows = [
+  { range: '每秒 0–3 公尺', level: '0–2 級', feel: '幾乎無感', advice: '適合久留，階梯與步道皆宜。' },
+  { range: '每秒 4–5 公尺', level: '3 級', feel: '微風拂面', advice: '舒適，適合散步與拍照。' },
+  { range: '每秒 6–7 公尺', level: '4 級', feel: '風稍明顯', advice: '仍舒適，帽子記得拿好。' },
+  { range: '每秒 8–11 公尺', level: '5 級', feel: '風偏大', advice: '建議帶防風外套，留在上層步道。' },
+  { range: '每秒 12–13 公尺', level: '6 級', feel: '明顯有風、陣風更強', advice: '浪花易濺上階梯，不建議進入下層。' },
+  { range: '每秒 14–17 公尺', level: '7 級', feel: '強風、行走吃力', advice: '建議改期或僅短暫停留。' },
+  { range: '每秒 18 公尺以上', level: '8 級以上', feel: '大風、難以站立', advice: '不建議前往，遠離海岸。' },
+];
+
+// 海岸專屬：浪高與水溫的判讀
+const waveRows = [
+  { range: '1 公尺以下', advice: '浪況平穩，可拍攝海浪層次與觀察潮間帶，仍請留意突發長浪。' },
+  { range: '1–1.5 公尺', advice: '浪況偏強，礁石與浪區請保持距離。' },
+  { range: '1.5–2.5 公尺', advice: '建議只待在上層步道，不要靠近消波塊與下層階梯。' },
+  { range: '2.5 公尺以上', advice: '屬大浪等級，不建議靠近海岸，請改期。' },
+];
+
+const seaTempRows = [
+  { range: '22°C 以下', advice: '海水偏涼，不建議長時間泡水或赤腳久站。' },
+  { range: '22–27°C', advice: '體感舒適，戲水仍請注意安全與天候變化。' },
+  { range: '28°C 以上', advice: '水溫偏暖，戲水請多補充水分並注意防曬。' },
+];
 ---
 
 <BaseLayout
-  title="南寮魚鱗天梯天氣與海象｜風速、降雨與浪高怎麼看"
-  description="南寮魚鱗天梯天氣與海象指南，教你出發前如何查看風速、降雨機率與浪高，以及各種天氣下的建議與備案。"
-  jsonLd={[breadcrumb(crumbs)]}
+  title="南寮漁港天氣｜南寮魚鱗天梯今日天氣、一週預報與穿搭建議"
+  description="南寮漁港與魚鱗天梯的即時天氣、一週預報與風速查詢。依預報直接給出穿搭建議、行程安排與浪高風險提醒，出發前 30 秒就能決定今天去不去。"
+  jsonLd={[breadcrumb(crumbs), faqPage(faqs)]}
 >
   <div class="mx-auto max-w-3xl px-4 py-10">
     <Breadcrumbs items={crumbs} />
     <h1 class="mt-4 text-3xl font-bold">南寮魚鱗天梯天氣與海象</h1>
 
     <div class="mt-6">
-      <LiveWeather />
+      <LiveWeather context="full" server:defer>
+        <ServerIslandFallback slot="fallback" label="正在載入即時天氣與一週預報" rows={6} />
+      </LiveWeather>
     </div>
 
     <div class="prose-cn mt-8">
-      <p>魚鱗天梯是開放海岸，天氣與海象直接影響體驗與安全。出發前建議查看四項資訊：</p>
-      <h2>要看哪四項</h2>
+      <p>
+        魚鱗天梯是面向台灣海峽的開放海岸，沒有建築物或防風林遮蔽，天氣與海象直接決定體驗與安全。上方模組會依即時預報直接給出可執行的建議，這一頁則說明這些建議是怎麼判斷的，方便你自行調整。
+      </p>
+
+      <h2>建議是怎麼產生的</h2>
       <ul>
-        <li><strong>風速</strong>：海邊風比市區大，超過每秒 9 公尺體感明顯，帶擋風外套。</li>
-        <li><strong>降雨機率</strong>：午後雷陣雨常見，雨天改看<a href="/itineraries/rainy-day/">雨天備案</a>。</li>
-        <li><strong>浪高與海象警示</strong>：有警示時勿靠近下層階梯。</li>
-        <li><strong>夕陽可見度</strong>：雲量太多會遮住夕陽，可對照<a href="/sunset/">日落時間</a>。</li>
+        <li><strong>風險提醒優先</strong>：只要出現雷雨、強降雨、強風大浪、極端紫外線或濃霧，提醒會放在最前面，並改以「調整行程」為主，不再強調玩樂建議。</li>
+        <li><strong>出行穿搭</strong>：依氣溫、日夜溫差、紫外線、風力與雨勢決定穿什麼，例如溫差超過 8°C 會提醒帶一件可增減的外套。</li>
+        <li><strong>遊玩安排</strong>：依天氣與海象決定時段與動線，並會標出預報中相對舒適的時段，例如「今日 17:00–19:00」。</li>
+        <li><strong>隨身物品</strong>：只列出當天真正需要的東西，不下雨就不會出現雨傘，入夜後也不會再提醒防曬。</li>
       </ul>
+      <p class="text-sm text-ink/65">
+        這些提醒是依預報推估的判斷，並非官方氣象警報；颱風、海上警報或長浪警示請以交通部中央氣象署與現場公告為準。
+      </p>
+
+      <h2>出發前要看的四項資訊</h2>
+      <ul>
+        <li><strong>風速與陣風</strong>：海邊風明顯強於市區，平均風速超過每秒 8 公尺（約 5 級）體感就會偏冷，建議帶防風外套。</li>
+        <li><strong>降雨機率與雨勢</strong>：新竹午後雷陣雨好發於夏季，雨天可改走<a href="/itineraries/rainy-day/">雨天備案</a>。</li>
+        <li><strong>浪高與海象警示</strong>：有長浪、海警或現場封鎖時，請勿靠近下層階梯與消波塊。</li>
+        <li><strong>紫外線與日落時間</strong>：紫外線達「強」以上就要確實防曬；雲量過高會遮住落日，可先看雲量再對照<a href="/sunset/">日落時間</a>。</li>
+      </ul>
+
+      <h2>風速對照與建議</h2>
+      <table>
+        <thead>
+          <tr><th>平均風速</th><th>約當風級</th><th>體感</th><th>建議</th></tr>
+        </thead>
+        <tbody>
+          {
+            windRows.map((r) => (
+              <tr>
+                <td>{r.range}</td>
+                <td>{r.level}</td>
+                <td>{r.feel}</td>
+                <td>{r.advice}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+      <p class="text-sm text-ink/65">
+        陣風往往比平均風速高出許多，看風速時請一併參考陣風值；若陣風達每秒 18 公尺以上，請避免站在開闊處或靠近浪區。
+      </p>
+
+      <h2>海邊專屬：浪高與水溫怎麼看</h2>
+      <p>
+        一般城市天氣預報不會告訴你浪況，但對開放海岸來說，浪高往往比氣溫更關鍵。本站即時模組已把浪高與海水溫度納入建議，判讀原則如下。
+      </p>
+      <table>
+        <thead>
+          <tr><th>浪高</th><th>建議</th></tr>
+        </thead>
+        <tbody>
+          {
+            waveRows.map((r) => (
+              <tr>
+                <td>{r.range}</td>
+                <td>{r.advice}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+      <table>
+        <thead>
+          <tr><th>海水溫度</th><th>建議</th></tr>
+        </thead>
+        <tbody>
+          {
+            seaTempRows.map((r) => (
+              <tr>
+                <td>{r.range}</td>
+                <td>{r.advice}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+      <p>
+        與潮汐搭配判讀效果最好：滿潮前後水位最高、離岸流與礁石沒入的風險較高，沙灘與礁石活動請預留 30 分鐘回程；乾潮前後 1 小時則是觀察潮間帶的好時機。逐時潮位與倒數請見<a href="/tide/">即時潮汐看板</a>。
+      </p>
 
       <h2>各種天氣怎麼安排</h2>
       <table>
         <thead><tr><th>狀況</th><th>建議</th></tr></thead>
         <tbody>
-          <tr><td>晴朗微風</td><td>最佳，日落前一小時抵達看夕陽。</td></tr>
-          <tr><td>風較強</td><td>可前往，帶外套、遠離溼滑下層階梯。</td></tr>
-          <tr><td>可能下雨</td><td>備雨具，或改室內市集與美食。</td></tr>
-          <tr><td>強風大雨／海象警示</td><td>改期，勿靠近海岸下層。</td></tr>
+          <tr><td>晴朗微風</td><td>最佳條件，日落前 60～90 分鐘抵達即可拍到好光線。</td></tr>
+          <tr><td>高溫、紫外線強</td><td>避開 11:00–14:00，改在傍晚前往，並備足飲水與防曬。</td></tr>
+          <tr><td>風較強</td><td>可以前往，帶外套並遠離溼滑的下層階梯與浪區。</td></tr>
+          <tr><td>可能下雨</td><td>備妥雨具，或改走室內市集與美食行程；機率高時把行程排鬆一點。</td></tr>
+          <tr><td>雨後放晴</td><td>天空層次豐富且人潮較少，是攝影的好時機，但仍須注意溼滑。</td></tr>
+          <tr><td>雷雨、強風大雨、大浪或海象警示</td><td>建議改期，勿靠近海岸下層與消波塊。</td></tr>
         </tbody>
       </table>
 
-      <h2>官方即時資料</h2>
-      <p>本站天氣為預報示意，即時資料請以官方為準：</p>
+      <h2>季節差異與長期概況</h2>
+      <p>
+        新竹沿海四季差異明顯：夏季高溫多雷陣雨、冬季東北季風強勁，春季與秋季通常是最舒服的季節。各季的風、海象與生態亮點整理在<a href="/seasons/">四季遊覽策略</a>，可搭配本頁即時預報一起看。
+      </p>
+
+      <h2>官方即時資訊</h2>
+      <p>本模組提供的是預報與據此推估的建議，遇有颱風、長浪或海上警報時，請以官方發布為準：</p>
       <ul>
-        <li><a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener">中央氣象署</a>（天氣、風力、浪高）</li>
-        <li><a href="https://www.cwa.gov.tw/V8/C/T/Marine.html" target="_blank" rel="noopener">中央氣象署海象／潮汐</a></li>
-        <li><a href="https://opendata.cwa.gov.tw/" target="_blank" rel="noopener">氣象資料開放平臺</a>（沿海 72 小時預報 API）</li>
+        <li><a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener noreferrer">中央氣象署</a>（天氣、風力、浪高與各類警特報）</li>
+        <li><a href="https://www.cwa.gov.tw/V8/C/T/Marine.html" target="_blank" rel="noopener noreferrer">中央氣象署海象與潮汐</a></li>
+        <li><a href="https://opendata.cwa.gov.tw/" target="_blank" rel="noopener noreferrer">氣象資料開放平臺</a>（官方觀測與預報資料）</li>
       </ul>
-      <blockquote>若日後接入即時 API 失敗，本站不會把預報顯示為即時資料，而會標示最後成功更新時間，並提供官方入口。</blockquote>
+
+      <h2>常見問題</h2>
+      {faqs.map((f) => (
+        <>
+          <h3>{f.q}</h3>
+          <p>{f.a}</p>
+        </>
+      ))}
     </div>
   </div>
 </BaseLayout>

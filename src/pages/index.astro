@@ -3,9 +3,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import TodayStatus from '../components/TodayStatus.astro';
 import LiveWeather from '../components/LiveWeather.astro';
+import LiveTide from '../components/LiveTide.astro';
+import ServerIslandFallback from '../components/ServerIslandFallback.astro';
 import QuickFacts from '../components/QuickFacts.astro';
 import PlaceMap from '../components/PlaceMap.astro';
 import Card from '../components/Card.astro';
+import GoogleRating from '../components/GoogleRating.astro';
+import SourceBlock from '../components/SourceBlock.astro';
 import { SITE } from '../data/site.js';
 import places from '../data/places.json';
 import {
@@ -16,9 +20,9 @@ import {
 } from '../lib/schema';
 
 const facts = [
-  { label: '地址', value: '新竹市北區新港路' },
-  { label: 'Plus Code', value: 'VW2F+WF' },
-  { label: 'Google 評分', value: '4.2（5,983 則評價）' },
+  { label: '地址', value: `${SITE.address.city}${SITE.address.district}${SITE.address.street}` },
+  { label: 'Plus Code', value: SITE.plusCode },
+  { label: 'Google 評分', value: `${SITE.googleRating.value}（${SITE.googleRating.count.toLocaleString('en-US')} 則評價）` },
   { label: '門票', value: '免費' },
   { label: '建議停留', value: '30 至 60 分鐘' },
   { label: '最佳時間', value: '日落前 60 至 90 分鐘' },
@@ -26,6 +30,23 @@ const facts = [
   { label: '無障礙', value: '上層步道可觀景，下層階梯不便' },
   { label: '寵物', value: '戶外空間，請繫牽繩' },
   { label: '夜間', value: '不建議進入靠海下層' },
+];
+
+// SEO：位置與交通語義（Location & How to Visit）
+const howToVisit = [
+  { label: '開車導航', value: `Google 地圖搜尋「${SITE.fullName}」或 Plus Code ${SITE.plusCode}` },
+  { label: '大眾運輸', value: '新竹火車站前搭乘往南寮方向公車，於南寮站下車步行前往' },
+  { label: '單車', value: '位於 17 公里海岸線起點附近，可自南寮租車站騎乘串連' },
+  { label: '停車', value: '南寮漁港第一停車場步行約 8 分鐘，假日午後建議改停第二停車場' },
+];
+
+// SEO：周邊語義集群（Landmarks & Attractions Around）
+const nearby = [
+  { name: '南寮漁港（新竹漁港）', href: '/nanliao-harbor/', note: '17 公里海岸線起點、漁市與遊艇碼頭' },
+  { name: '波光市集', href: '/boguang-market/', note: '白色波浪建築的餐飲與伴手禮聚落' },
+  { name: '親子沙灘', href: '/family-beach/', note: '可玩沙的緩坡沙灘與大草坪' },
+  { name: '國際風箏賽場', href: '/kite-field/', note: '海風穩定的放風箏大草坪' },
+  { name: '17 公里海岸線', href: '/17km-coastline/', note: '串連港南運河與香山濕地的自行車道' },
 ];
 
 const routes = [
@@ -55,6 +76,46 @@ const routes = [
   },
 ];
 
+// 深度專題：從「怎麼去」延伸到「為什麼是這樣」
+const deepDives = [
+  {
+    href: '/history/',
+    emoji: '📜',
+    title: '歷史與在地故事',
+    desc: '從出海口旁的漁村聚落、新竹漁港的闢建與轉型，到魚鱗天梯護岸的形成，以及風城九降風如何形塑這裡的生活。',
+  },
+  {
+    href: '/seasons/',
+    emoji: '🍂',
+    title: '四季遊覽策略與生態',
+    desc: '春、夏、秋、冬的氣溫、風勢、海象與水質差異，以及 12 個月的生態觀察日曆與候鳥季節。',
+  },
+  {
+    href: '/facilities/',
+    emoji: '🚻',
+    title: '訪客服務與周邊設施',
+    desc: '洗手間、停車、餐飲類型、住宿安排、便利商店與超市、加油與充電、提款藥局、無障礙與寵物規範。',
+  },
+  {
+    href: '/audiences/',
+    emoji: '👨‍👩‍👧',
+    title: '人群定制方案',
+    desc: '親子家庭、攝影與自然愛好者、低體力與無障礙、情侶好友四種動線，加上半日與全日通用行程時間表。',
+  },
+  {
+    href: '/responsibility/',
+    emoji: '🧭',
+    title: '科普與訪客責任',
+    desc: '消波塊與護岸為什麼這樣設計、瘋狗浪與離岸流怎麼判斷、落水自救順序，以及保育與垃圾帶走守則。',
+  },
+  {
+    href: '/tide/',
+    emoji: '🌊',
+    title: '即時潮汐看板',
+    desc: '目前潮位與漲退潮趨勢、下一次滿潮與乾潮倒數、24 小時潮位曲線、一週潮汐表與潮汐小辭典。',
+  },
+];
+
 const faqs = [
   { q: '魚鱗天梯在哪裡？', a: '位於新竹市北區新港路（南寮漁港），Plus Code 為 VW2F+WF；在 Google 地圖搜尋「南寮魚鱗天梯」即可導航。' },
   { q: '魚鱗天梯要門票嗎？', a: '免費，是全天開放的戶外海岸空間，不需預約。' },
@@ -78,14 +139,18 @@ const jsonLd = [
     address: '新竹市北區新港路',
     url: '/',
     alternateName: SITE.alternateNames,
+    // 評分屬「南寮魚鱗天梯」這個實體，且頁面上已明確標註來自 Google 地圖
+    aggregateRating: SITE.googleRating.includeInJsonLd
+      ? { value: SITE.googleRating.value, count: SITE.googleRating.count }
+      : undefined,
   }),
   faqPage(faqs),
 ];
 ---
 
 <BaseLayout
-  title="南寮魚鱗天梯｜今日天氣、潮汐、夕陽與停車攻略"
-  description="南寮魚鱗天梯旅遊指南，整理今日天氣、風速、潮汐、日落時間、停車、交通、拍照位置，以及南寮漁港親子與半日遊行程。"
+  title="南寮魚鱗天梯旅遊指南｜天氣潮汐、波光市集與交通停車攻略"
+  description="新竹南寮漁港旅遊指南：魚鱗天梯最佳拍照時間、波光市集美食、17 公里海岸線單車路線，以及出發前必看的即時天氣、風速與潮汐預報。"
   appendBrand={false}
   jsonLd={jsonLd}
 >
@@ -105,14 +170,30 @@ const jsonLd = [
   />
 
   <div class="mx-auto max-w-6xl px-4">
-    <!-- 今日狀況（全站最重要模組） -->
+    <!-- 今日狀況（全站最重要模組；於邊緣節點即時計算） -->
     <section class="-mt-10 relative z-10">
-      <TodayStatus />
+      <TodayStatus server:defer>
+        <ServerIslandFallback slot="fallback" label="正在確認今日狀況" />
+      </TodayStatus>
     </section>
 
-    <!-- 即時天氣模組 -->
+    <!-- 即時天氣模組（伺服器端渲染 + 邊緣快取） -->
     <section class="mt-6">
-      <LiveWeather context="home" />
+      <LiveWeather context="home" server:defer>
+        <ServerIslandFallback slot="fallback" label="正在載入即時天氣" />
+      </LiveWeather>
+    </section>
+
+    <!-- 即時潮汐模組（伺服器端渲染 + 邊緣快取） -->
+    <section class="mt-6">
+      <LiveTide context="home" server:defer>
+        <ServerIslandFallback slot="fallback" label="正在載入即時潮汐" rows={4} />
+      </LiveTide>
+    </section>
+
+    <!-- Google 地圖評價（最新評分，並標註來源） -->
+    <section class="mt-6">
+      <GoogleRating />
     </section>
 
     <!-- 快速資訊卡 -->
@@ -158,6 +239,60 @@ const jsonLd = [
       </div>
     </section>
 
+    <!-- SEO：位置與交通（Location & How to Visit） -->
+    <section class="mt-14" aria-labelledby="visit-heading">
+      <h2 id="visit-heading" class="text-2xl">位置與交通：如何前往南寮魚鱗天梯</h2>
+      <p class="mt-3 leading-relaxed text-ink/80">
+        <strong>南寮魚鱗天梯（Nanliao Stairway）</strong>位於<strong>臺灣新竹市北區新港路</strong>（郵遞區號 300，Plus Code <strong>{SITE.plusCode}</strong>），緊鄰南寮漁港海岸，開車、公車與單車都能抵達。
+      </p>
+      <dl class="mt-5 grid gap-3 sm:grid-cols-2">
+        {
+          howToVisit.map((x) => (
+            <div class="rounded-xl border border-scale bg-white p-4">
+              <dt class="text-sm font-semibold text-deepsea">{x.label}</dt>
+              <dd class="mt-1 text-sm text-ink/75">{x.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <div class="mt-5 flex flex-wrap gap-2">
+        <a href={SITE.mapsUrl} target="_blank" rel="noopener noreferrer" class="rounded-full bg-deepsea px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ink">在 Google 地圖開啟南寮魚鱗天梯 ↗</a>
+        <a href="/transport/" class="rounded-full border border-deepsea px-4 py-2 text-sm font-semibold text-deepsea hover:bg-scale">完整交通方式</a>
+        <a href="/parking/" class="rounded-full border border-deepsea px-4 py-2 text-sm font-semibold text-deepsea hover:bg-scale">停車攻略</a>
+      </div>
+    </section>
+
+    <!-- SEO：歷史與意義（History & Significance） -->
+    <section class="mt-14" aria-labelledby="history-heading">
+      <div class="rounded-2xl border border-scale bg-white p-6 sm:p-8">
+        <h2 id="history-heading" class="text-2xl">歷史與意義：南寮魚鱗天梯的由來</h2>
+        <p class="mt-4 leading-relaxed text-ink/80">
+          南寮魚鱗天梯是新竹漁港（南寮漁港）海岸改造工程的一部分，以消波塊層層堆疊成階梯狀護岸，兼具<strong>消波</strong>、<strong>護岸</strong>與<strong>休憩觀景</strong>功能。因為階梯層疊、遠看像魚鱗而得名，如今已成為南寮海岸線最具辨識度的地標，也是 17 公里海岸線起點附近重要的看海、追夕陽與婚紗拍攝地點。
+        </p>
+        <p class="mt-3 text-sm text-ink/65">
+          工程性質與定位依據新竹市政府香山濕地生態網、新竹市政府觀光旅遊網等公開資料整理；實際構造與開放範圍請以現場公告為準。
+        </p>
+      </div>
+    </section>
+
+    <!-- SEO：周邊地標語義集群（Landmarks & Attractions Around） -->
+    <section class="mt-14" aria-labelledby="landmarks-heading">
+      <h2 id="landmarks-heading" class="text-2xl">南寮魚鱗天梯周邊地標</h2>
+      <p class="mt-3 leading-relaxed text-ink/80">
+        造訪<strong>南寮魚鱗天梯</strong>時，可順遊下列周邊核心地標與景點：
+      </p>
+      <ul class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          nearby.map((n) => (
+            <li class="rounded-xl border border-scale bg-white p-4">
+              <a href={n.href} class="font-semibold text-deepsea underline hover:text-sunset">{n.name}</a>
+              <p class="mt-1 text-sm text-ink/70">{n.note}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
     <!-- 互動地圖 -->
     <section class="mt-14">
       <div class="flex items-end justify-between gap-3">
@@ -195,10 +330,35 @@ const jsonLd = [
             <Card
               href={`/${p.slug}/`}
               image={p.image}
-              alt={p.name}
+              alt={`${p.name}｜鄰近${SITE.shortName}的南寮順遊景點`}
               title={p.name}
               desc={p.summary}
             />
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- 深度專題（專業科普內容入口） -->
+    <section class="mt-14" aria-labelledby="deepdive-heading">
+      <div class="flex items-end justify-between gap-3">
+        <h2 id="deepdive-heading" class="text-2xl">深度認識南寮海岸</h2>
+        <a href="/seasons/" class="text-sm font-semibold text-deepsea underline">從四季與生態開始</a>
+      </div>
+      <p class="mt-2 text-sm text-ink/70">
+        除了怎麼去、幾點去，這裡也解釋「為什麼是這樣」：海洋工程、潮汐成因、季節與生態變化，以及在地的歷史脈絡。
+      </p>
+      <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          deepDives.map((d) => (
+            <a
+              href={d.href}
+              class="group rounded-2xl border border-scale bg-white p-5 transition-colors hover:border-coast"
+            >
+              <div class="text-xl" aria-hidden="true">{d.emoji}</div>
+              <h3 class="mt-2 text-base font-semibold text-deepsea group-hover:text-sunset">{d.title}</h3>
+              <p class="mt-1.5 text-sm leading-relaxed text-ink/75">{d.desc}</p>
+            </a>
           ))
         }
       </div>
@@ -223,5 +383,15 @@ const jsonLd = [
         }
       </div>
     </section>
+
+    <!-- 資料來源（E-E-A-T：透明度與可查核性） -->
+    <SourceBlock
+      sources={[
+        { label: 'Google 地圖（南寮魚鱗天梯地點頁與使用者評價）', href: SITE.googleRating.sourceUrl },
+        { label: SITE.govtTourismLabel, href: SITE.govtTourismUrl },
+        { label: '新竹市政府香山濕地生態網·魚鱗天梯', href: 'https://ssw.hccg.gov.tw/' },
+        { label: '中央氣象署開放資料平臺', href: 'https://opendata.cwa.gov.tw/' },
+      ]}
+    />
   </div>
 </BaseLayout>

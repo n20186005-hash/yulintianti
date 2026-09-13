@@ -1,4 +1,6 @@
-# Cloudflare Pages 標頭設定
+# Cloudflare Workers 靜態資產標頭設定
+# 格式：第一行為 URL 或 URL 模式，其後為縮排的「名稱: 值」
+# 官方文件：https://developers.cloudflare.com/workers/static-assets/headers/
 
 # 靜態資產長快取
 /images/*
@@ -16,6 +18,6 @@
 /sw.js
   Cache-Control: public, max-age=0, must-revalidate
 
-# 避免 Cloudflare Pages 預設 *.pages.dev 測試網域被搜尋引擎收錄
-https://:project.pages.dev/*
+# 避免 Workers 預設測試網域（<worker>.<subdomain>.workers.dev）被搜尋引擎收錄
+https://:worker.:subdomain.workers.dev/*
   X-Robots-Tag: noindex

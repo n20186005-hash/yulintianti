@@ -1,0 +1,199 @@
+---
+/**
+ * 今日最佳拍照時段（伺服器端渲染）
+ * 由伺服器島嶼呼叫：於邊緣節點即時計算，不進前端 bundle。
+ *
+ * 目的：遊客查「南寮潮汐時間」時，真正想知道的是「我幾點去最好」。
+ * 因此這裡不做資料羅列，而是把「下一次滿潮／乾潮」與「日落黃金時段」交叉比對，
+ * 直接收斂出一個可以卡位的具體時間區間，並說明理由。
+ *
+ * 時間軸說明：所有區間都以「距離現在幾分鐘」計算，最後才換算回時鐘時間，
+ * 因此跨日（下一次滿潮在明天凌晨）不需要額外判斷。
+ */
+import { SITE } from '../data/site.js';
+import { getGoldenWindow } from '../lib/sunset';
+import { getTide, minutesUntil, nowInTaipeiISO } from '../lib/tide-server';
+
+const now = new Date();
+const tide = await getTide(now);
+const golden = getGoldenWindow(now, SITE.geo.lat, SITE.geo.lng);
+
+const nowMin = mm(nowInTaipeiISO(now).slice(11, 16));
+
+/** HH:MM → 自 00:00 起的分鐘數 */
+function mm(hhmm: string): number {
+  return Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
+}
+
+/** 距離現在 delta 分鐘 → HH:MM（跨日自動回捲，僅供顯示） */
+function clock(delta: number): string {
+  const m = ((Math.round(nowMin + delta) % 1440) + 1440) % 1440;
+  return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+}
+
+/** 是否落在明天的時鐘時間（例如凌晨的乾潮） */
+const isTomorrow = (delta: number) => nowMin + delta >= 1440;
+
+interface Win {
+  key: 'high' | 'low' | 'sunset';
+  icon: string;
+  title: string;
+  /** 距現在的分鐘數，負值代表已開始 */
+  start: number;
+  end: number;
+  range: string;
+  eventLabel: string;
+  later: boolean;
+  reason: string;
+  photo: string;
+}
+
+const windows: Win[] = [];
+
+if (tide?.nextHigh) {
+  const m = minutesUntil(tide.nextHigh, now);
+  if (m !== null) {
+    windows.push({
+      key: 'high',
+      icon: '🌊',
+      title: '滿潮倒影',
+      start: m - 60,
+      end: m + 60,
+      range: `${clock(m - 60)}–${clock(m + 60)}`,
+      eventLabel: `滿潮 ${tide.nextHigh.time}`,
+      later: isTomorrow(m),
+      reason: '滿潮前後 1 小時海水最貼近階梯，水面反射面積最大。',
+      photo: '適合拍大面積水面與層疊線條。',
+    });
+  }
+}
+
+if (tide?.nextLow) {
+  const m = minutesUntil(tide.nextLow, now);
+  if (m !== null) {
+    windows.push({
+      key: 'low',
+      icon: '🪨',
+      title: '乾潮結構',
+      start: m - 120,
+      end: m + 120,
+      range: `${clock(m - 120)}–${clock(m + 120)}`,
+      eventLabel: `乾潮 ${tide.nextLow.time}（前後 2 小時）`,
+      later: isTomorrow(m),
+      reason: '乾潮前後消波塊與潮間帶裸露最多，能看到完整的魚鱗排列。',
+      photo: '適合拍塊體幾何與潮間帶生態。',
+    });
+  }
+}
+
+// 日落黃金時段（今日）；若今天已日落就不再列入
+const goldenStart = golden ? mm(golden.start) - nowMin : null;
+const goldenEnd = golden ? mm(golden.end) - nowMin : null;
+
+if (golden && goldenStart !== null && goldenEnd !== null && goldenEnd > 0) {
+  windows.push({
+    key: 'sunset',
+    icon: '🌅',
+    title: '日落黃金時段',
+    start: goldenStart,
+    end: goldenEnd,
+    range: `${clock(goldenStart)}–${clock(goldenEnd)}`,
+    eventLabel: `日落 ${golden.sunset}`,
+    later: false,
+    reason: '日落前後的斜射光會把海面與階梯染成暖色。',
+    photo: '適合拍色溫與剪影。',
+  });
+}
+
+// —— 選出今天最推薦的一段 ——
+const tideWindows = windows.filter((w) => w.key !== 'sunset');
+const sunsetWindow = windows.find((w) => w.key === 'sunset') ?? null;
+
+let best: Win | null = null;
+/** 潮汐時段與日落重疊出來的最強組合 */
+let combo: string | null = null;
+
+if (sunsetWindow) {
+  // 與日落重疊 30 分鐘以上，就是最值得卡位的組合
+  for (const w of tideWindows) {
+    const s = Math.max(w.start, sunsetWindow.start);
+    const e = Math.min(w.end, sunsetWindow.end);
+    if (e - s >= 30) {
+      best = w;
+      combo = `${clock(s)}–${clock(e)}`;
+      break;
+    }
+  }
+}
+
+if (!best) {
+  // 還沒結束、最快到來的潮汐時段
+  best = tideWindows.filter((w) => w.end > 0).sort((a, b) => a.start - b.start)[0] ?? null;
+}
+if (!best) best = sunsetWindow;
+
+const bestTitle = best
+  ? combo && best.key === 'high'
+    ? '滿潮 × 夕陽（最強組合）'
+    : combo && best.key === 'low'
+      ? '乾潮 × 夕陽（結構與色溫兼得）'
+      : best.title
+  : null;
+
+const bestWhen = best?.later ? '明日' : '今天';
+---
+
+<section
+  aria-labelledby="photo-window-heading"
+  class="rounded-2xl border border-sunset/40 bg-sunset/10 p-6 shadow-sm"
+>
+  <h2 id="photo-window-heading" class="text-xl">今天最推薦的拍照時段</h2>
+
+  {
+    best && bestTitle ? (
+      <>
+        <div class="mt-3 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+          <div>
+            <p class="text-xs font-semibold text-sunset">{bestWhen}最推薦</p>
+            <p class="text-3xl font-bold text-deepsea">{combo ?? best.range}</p>
+            <p class="mt-0.5 text-sm font-semibold text-deepsea">{bestTitle}</p>
+          </div>
+          <p class="max-w-md text-sm leading-relaxed text-ink/80">
+            {best.reason}
+            {best.photo}
+          </p>
+        </div>
+
+        <ul class="mt-5 grid gap-3 sm:grid-cols-3">
+          {windows.map((w) => (
+            <li
+              class:list={[
+                'rounded-xl border bg-white p-3.5',
+                w === best ? 'border-sunset' : 'border-scale',
+              ]}
+            >
+              <div class="flex items-center gap-1.5 text-sm font-semibold text-deepsea">
+                <span aria-hidden="true">{w.icon}</span>
+                <span>{w.title}</span>
+                {w.later && <span class="text-xs font-normal text-ink/55">（明日）</span>}
+              </div>
+              <div class="mt-1 text-lg font-bold text-deepsea">{w.range}</div>
+              <div class="text-xs text-ink/60">{w.eventLabel}</div>
+            </li>
+          ))}
+        </ul>
+
+        <p class="mt-4 text-xs leading-relaxed text-ink/60">
+          時段是依潮汐預報與日落時間推算的建議範圍，並非現場實況；構圖與取景位置見
+          <a href="/photo-spots/" class="underline">拍照位置</a>
+          。滿潮前後海水直接拍打階梯與消波塊，請留在上層步道，遇現場封鎖或警示時一律以現場規定為準（詳見
+          <a href="/responsibility/" class="underline">訪客責任</a>）。
+        </p>
+      </>
+    ) : (
+      <p class="mt-3 rounded-xl border border-scale bg-white p-4 text-sm text-ink/75">
+        即時潮汐暫時無法取得，建議先依下方的一週潮汐表安排日期；資料恢復後本區塊會自動顯示最佳時段。
+      </p>
+    )
+  }
+</section>

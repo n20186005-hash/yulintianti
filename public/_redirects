@@ -1,6 +1,24 @@
-# Cloudflare Pages 轉址規則
-# 將 www 永久 301 轉至裸網域（apex）
-https://www.yulintianti.com/* https://yulintianti.com/:splat 301!
-# 舊網域永久轉至新網域（需保留舊網域綁定才會生效）
-https://nanliaotianti.com/* https://yulintianti.com/:splat 301!
-https://www.nanliaotianti.com/* https://yulintianti.com/:splat 301!
+# ── Cloudflare Workers 靜態資產轉址規則 ──
+# 格式：[source] [destination] [code]     （code 只能是 301／302／303／307／308）
+# 官方文件：https://developers.cloudflare.com/workers/static-assets/redirects/
+#
+# ⚠️ 本站不是 Cloudflare Pages，而是 Workers + 靜態資產。Workers 的 _redirects
+#    「source 只能是檔案路徑」，不支援主機層級比對（Domain-level redirect），
+#    因此像 https://www.yulintianti.com/* 這種寫法不會生效（整行被忽略），
+#    也不能寫成 301!（沒有驚嘆號語法）。www 與舊網域的轉址必須改用
+#    Cloudflare 後台 → 規則 → 重新導向規則，設定如下：
+#
+#    名稱：www 轉裸網域
+#    若傳入請求符合：http.host eq "www.yulintianti.com"
+#    則重新導向 → 動態運算式：concat("https://yulintianti.com", http.request.uri.path)
+#    狀態碼：301（永久）
+#
+#    名稱：舊網域轉新網域
+#    若傳入請求符合：http.host in {"nanliaotianti.com" "www.nanliaotianti.com"}
+#    則重新導向 → 動態運算式：concat("https://yulintianti.com", http.request.uri.path)
+#    狀態碼：301（永久）
+#
+# 站內路徑層級的轉址寫在下方（目前無需轉址的舊路徑）。
+
+# 舊路徑轉址請依下列格式新增（source 需以 / 開頭，且每行只能有一個 *）：
+# /old-path/ /new-path/ 301

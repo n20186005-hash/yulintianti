@@ -7,33 +7,107 @@ const crumbs = [
   { name: '首頁', href: '/' },
   { name: '資料來源', href: '/sources/' },
 ];
-const sources = [
-  { label: '新竹市政府觀光旅遊網', href: 'https://tourism.hccg.gov.tw/', note: '景點、活動與海岸線資訊' },
-  { label: '新竹市政府香山濕地生態網（魚鱗天梯介紹）', href: 'https://ssw.hccg.gov.tw/', note: '魚鱗天梯工程性質與定位' },
-  { label: '中央氣象署', href: 'https://www.cwa.gov.tw/', note: '天氣、風力、浪高與潮汐' },
-  { label: '中央氣象署氣象資料開放平臺', href: 'https://opendata.cwa.gov.tw/', note: '潮汐與沿海預報 API' },
+
+const groups = [
+  {
+    title: '新竹在地與觀光資訊',
+    note: '景點定位、設施、活動與海岸線整體規劃',
+    items: [
+      { label: '新竹市政府觀光旅遊網', href: 'https://tourism.hccg.gov.tw/', note: '景點介紹、活動訊息與 17 公里海岸線資訊' },
+      { label: '新竹市政府香山濕地生態網（魚鱗天梯介紹）', href: 'https://ssw.hccg.gov.tw/', note: '魚鱗天梯的工程性質與定位、香山濕地生態' },
+      { label: '新竹市政府全球資訊網', href: 'https://www.hccg.gov.tw/', note: '漁港管理、公共設施與市政公告' },
+      { label: '交通部觀光署', href: 'https://www.taiwan.net.tw/', note: '國家級觀光資訊與旅遊安全宣導' },
+    ],
+  },
+  {
+    title: '氣象、潮汐與海象',
+    note: '即時天氣、潮汐與海象資料的判讀依據',
+    items: [
+      { label: '中央氣象署', href: 'https://www.cwa.gov.tw/', note: '天氣預報、風力、浪高與長浪警示' },
+      { label: '中央氣象署潮汐預報', href: 'https://www.cwa.gov.tw/V8/C/T/Marine.html', note: '沿海潮汐預報，為本站潮汐資訊的比對基準' },
+      { label: '中央氣象署氣象資料開放平臺', href: 'https://opendata.cwa.gov.tw/', note: '氣候統計與沿海預報資料' },
+      { label: 'Open-Meteo 數值天氣與海洋預報', href: 'https://open-meteo.com/', note: '本站即時天氣、逐時潮位與海象模組的數值模式資料來源' },
+    ],
+  },
+  {
+    title: '生態、保育與海域安全',
+    note: '候鳥、潮間帶生物、保育物種與海岸安全觀念',
+    items: [
+      { label: '農業部林業及自然保育署', href: 'https://www.forest.gov.tw/', note: '自然保育政策與保護區資訊' },
+      { label: '農業部生物多樣性研究所', href: 'https://www.tesri.gov.tw/', note: '物種與生態監測資料' },
+      { label: '海洋委員會海洋保育署', href: 'https://www.oca.gov.tw/', note: '海洋保育與白海豚保育計畫' },
+      { label: '海洋委員會海巡署', href: 'https://www.cga.gov.tw/', note: '海域安全宣導與緊急報案資訊' },
+      { label: '內政部國家公園署', href: 'https://www.nps.gov.tw/', note: '海岸保育與環境教育觀念' },
+    ],
+  },
+  {
+    title: '地點與評價',
+    note: '座標、位址與使用者評價',
+    items: [
+      {
+        label: 'Google 地圖（南寮魚鱗天梯地點頁）',
+        href: 'https://maps.app.goo.gl/PAGBgo7yN5czhQnJA',
+        note: '地點全稱、類別、地址、座標與使用者評價來源（評價數字為即時擷取，僅供參考）',
+      },
+    ],
+  },
 ];
+
+const total = groups.reduce((n, g) => n + g.items.length, 0);
 ---
 
 <BaseLayout
   title="資料來源｜南寮魚鱗天梯引用的官方與公開資料"
-  description="南寮魚鱗天梯引用的資料來源清單，包含新竹市政府觀光旅遊網與中央氣象署等官方與公開資料。"
+  description="南寮魚鱗天梯引用的資料來源清單：新竹市政府、交通部觀光署、中央氣象署、林業及自然保育署、海洋保育署、海巡署等官方與公開資料，以及即時氣象與潮汐的資料來源。"
   jsonLd={[breadcrumb(crumbs)]}
 >
   <div class="mx-auto max-w-3xl px-4 py-10">
     <Breadcrumbs items={crumbs} />
     <h1 class="mt-4 text-3xl font-bold">資料來源</h1>
-    <p class="mt-3 text-ink/75">本站主要引用下列官方與公開資料，並以此為查核依據。</p>
-    <ul class="mt-6 space-y-4">
+    <p class="mt-3 leading-relaxed text-ink/80">
+      本站為非營利科普網站，內容以官方公告與公開資料為查核依據，共引用 {total} 項來源，依主題分類如下。
+      若你發現本站內容與官方資訊不一致，歡迎透過<a href="/contact/" class="underline">聯絡我們</a>告知，我們會盡快更正。
+    </p>
+
+    <div class="mt-8 space-y-8">
       {
-        sources.map((s) => (
-          <li class="rounded-xl border border-scale bg-white p-4">
-            <a href={s.href} target="_blank" rel="noopener" class="font-semibold text-deepsea underline">{s.label}</a>
-            <p class="mt-1 text-sm text-ink/70">{s.note}</p>
-          </li>
+        groups.map((g) => (
+          <section>
+            <h2 class="text-xl">{g.title}</h2>
+            <p class="mt-1 text-sm text-ink/60">{g.note}</p>
+            <ul class="mt-4 space-y-3">
+              {g.items.map((s) => (
+                <li class="rounded-xl border border-scale bg-white p-4">
+                  <a
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="font-semibold text-deepsea underline hover:text-sunset"
+                  >
+                    {s.label} ↗
+                  </a>
+                  <p class="mt-1 text-sm text-ink/70">{s.note}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
         ))
       }
-    </ul>
-    <p class="mt-6 text-sm text-ink/60">圖片來源與授權，另見<a href="/image-credits/" class="underline">圖片授權</a>。</p>
+    </div>
+
+    <section class="mt-10 rounded-2xl border border-scale bg-scale/40 p-5">
+      <h2 class="text-lg">關於即時資料的說明</h2>
+      <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-ink/75">
+        <li>· 天氣、潮汐與海象數值為模式推算的預報結果，會隨時間更新，並非現場實測值。</li>
+        <li>· 潮位以平均海平面為 0 公尺基準，與潮位站實測或港區公告可能出現數值差異。</li>
+        <li>· 颱風、低壓與強勁季風期間，實際水位與浪況可能明顯偏離預報，請以現場警示與主管機關公告為準。</li>
+        <li>· 本站不提供即時災害警示，緊急情況請撥打 118（海巡）或 119（消防救護）。</li>
+      </ul>
+    </section>
+
+    <p class="mt-6 text-sm text-ink/60">
+      圖片來源與授權，另見<a href="/image-credits/" class="underline">圖片授權</a>；內容撰寫原則見
+      <a href="/editorial-policy/" class="underline">編輯政策</a>。
+    </p>
   </div>
 </BaseLayout>

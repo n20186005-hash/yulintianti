@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import ArticleLayout from '../layouts/ArticleLayout.astro';
 import QuickFacts from '../components/QuickFacts.astro';
+import GoogleRating from '../components/GoogleRating.astro';
 import { SITE } from '../data/site.js';
 import places from '../data/places.json';
 import {
@@ -60,6 +61,12 @@ const placeSchema =
         lng: place?.longitude ?? SITE.geo.lng,
         address: place?.address ?? d.address,
         url,
+        // Google 地圖評分只屬於「南寮魚鱗天梯」這個實體，
+        // 套用到南寮漁港、風箏賽場等其他頁面即屬錯誤標記
+        aggregateRating:
+          entry.id === 'yulin-tianti' && SITE.googleRating.includeInJsonLd
+            ? { value: SITE.googleRating.value, count: SITE.googleRating.count }
+            : undefined,
       });
 
 const jsonLd = [
@@ -89,5 +96,12 @@ const jsonLd = [
   jsonLd={jsonLd}
 >
   {facts.length > 0 && <QuickFacts slot="before" rows={facts} title="基本資料" />}
+  {
+    entry.id === 'yulin-tianti' && (
+      <div class="mt-4" slot="before">
+        <GoogleRating compact />
+      </div>
+    )
+  }
   <Content />
 </ArticleLayout>

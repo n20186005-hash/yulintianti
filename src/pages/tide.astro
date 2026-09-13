@@ -1,39 +1,177 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
-import TideTable from '../components/TideTable.astro';
-import { breadcrumb } from '../lib/schema';
+import LiveTide from '../components/LiveTide.astro';
+import BestPhotoWindow from '../components/BestPhotoWindow.astro';
+import ServerIslandFallback from '../components/ServerIslandFallback.astro';
+import SourceBlock from '../components/SourceBlock.astro';
+import { breadcrumb, faqPage } from '../lib/schema';
 
 const crumbs = [
   { name: '首頁', href: '/' },
   { name: '潮汐', href: '/tide/' },
 ];
+
+const faqs = [
+  {
+    q: '潮位顯示負數是什麼意思？',
+    a: '本站潮位以「平均海平面」為 0 公尺基準，因此乾潮時潮位低於平均海平面就會出現負值。這代表海水退得比平均位置更低，並非資料錯誤。',
+  },
+  {
+    q: '什麼時候來魚鱗天梯海景最好？',
+    a: '滿潮前後 1 小時海水最貼近階梯，海面層次與倒影效果最好；乾潮前後則會露出消波塊與潮間帶，適合觀察海岸結構。若能排在滿潮與日落時間接近的日子，畫面最完整。',
+  },
+  {
+    q: '為什麼這裡的潮汐時間和氣象署公布的不完全一樣？',
+    a: '本站潮位由海洋數值模式的網格資料推算，代表南寮外海一帶的概況；中央氣象署的潮汐預報則以潮位站實測與當地調和分析為基礎。兩者的基準、站位與計算方式不同，出現數分鐘至十餘分鐘差異是正常的。',
+  },
+  {
+    q: '大潮和小潮差在哪裡？',
+    a: '大潮出現在朔（新月）或望（滿月）前後，此時太陽與月亮的引潮力方向接近而疊加，潮差最大；上弦月與下弦月前後引潮力互相抵消，潮差最小稱為小潮。大潮期間潮位升降速度快，靠近海岸要更留意。',
+  },
+  {
+    q: '滿潮時可以走下階梯嗎？',
+    a: '不建議。滿潮前後海水直接拍打階梯與消波塊，溼滑且易有突發浪湧。請在上層步道觀察，遇到現場封鎖、警示或工作人員指示時，一律以現場規定為準。',
+  },
+];
+
+const guide = [
+  {
+    emoji: '🌅',
+    title: '滿潮 × 日落',
+    body: '滿潮前後 1 小時海水最貼近階梯，水面反射面積最大，搭配日落斜射光可同時拍到倒影與色溫。先比對本頁的滿潮時間與日落時間，差距在 90 分鐘內就是理想組合。',
+  },
+  {
+    emoji: '🪨',
+    title: '乾潮 × 結構觀察',
+    body: '乾潮前後會露出消波塊、塊石與潮間帶，是理解這道護岸如何運作最好的時機，也適合觀察螃蟹與螺貝。此時石面長苔溼滑，請穿防滑鞋並避免踩踏生物。',
+  },
+  {
+    emoji: '📷',
+    title: '不同潮位拍法不同',
+    body: '高水位適合拍大面積水面與層疊線條；中水位可同時帶到階梯與海水；低水位則能拍出塊體的幾何排列。同一地點三種潮位，畫面差異非常大。',
+  },
+  {
+    emoji: '⚠️',
+    title: '漲潮速度比想像快',
+    body: '沙灘與潮間帶的漲潮常在不知不覺中發生，回頭路可能已被海水覆蓋。出發前確認下一次滿潮時間，並預留至少 30 分鐘的回程時間。',
+  },
+];
 ---
 
 <BaseLayout
-  title="南寮魚鱗天梯潮汐表｜今日漲潮與退潮時間"
-  description="南寮魚鱗天梯潮汐表，整理未來數日的滿潮與乾潮時間與水位，幫你挑選海景最好的時段拍照。"
-  jsonLd={[breadcrumb(crumbs)]}
+  title="南寮潮汐表｜南寮漁港漲退潮時間、南寮魚鱗天梯最佳拍照時機"
+  description="南寮漁港潮汐表：每日滿潮、乾潮與漲退潮時間查詢，並依潮位與日落直接算出魚鱗天梯今天最推薦的拍照時段，含 24 小時潮位曲線與一週潮汐預報。"
+  jsonLd={[breadcrumb(crumbs), faqPage(faqs)]}
 >
-  <div class="mx-auto max-w-3xl px-4 py-10">
+  <div class="mx-auto max-w-4xl px-4 py-10">
     <Breadcrumbs items={crumbs} />
-    <h1 class="mt-4 text-3xl font-bold">南寮魚鱗天梯潮汐表</h1>
-    <p class="mt-3 text-ink/75">
-      滿潮時海水貼近階梯、海景層次最好；退潮時可看到消波結構。挑對潮汐，拍照效果差很多。
+    <h1 class="mt-4 text-3xl font-bold">南寮漁港潮汐表與魚鱗天梯最佳拍照時間</h1>
+    <p class="mt-3 leading-relaxed text-ink/80">
+      潮汐是這裡最容易被忽略、卻最直接影響畫面的變數。滿潮時海水貼近階梯、海景層次最好；退潮時可看到消波塊與潮間帶。
+      這頁提供<strong>即時潮位、漲退潮趨勢、下一次滿潮與乾潮倒數、24 小時潮位曲線與一週潮汐表</strong>，
+      並直接算出<strong>今天最推薦的拍照時段</strong>。
     </p>
 
     <div class="mt-6">
-      <TideTable days={7} />
+      <LiveTide context="full" server:defer>
+        <ServerIslandFallback slot="fallback" label="正在載入即時潮汐" rows={4} />
+      </LiveTide>
     </div>
 
-    <section class="prose-cn mt-8">
-      <h2>怎麼看潮汐</h2>
-      <ul>
-        <li><strong>想拍海景倒影</strong>：挑接近滿潮的時段。</li>
-        <li><strong>想看消波結構</strong>：挑接近乾潮的時段，注意階梯溼滑。</li>
-        <li><strong>想同時看夕陽</strong>：對照<a href="/sunset/">日落時間</a>，找潮汐與日落接近的日子。</li>
-      </ul>
-      <blockquote>潮汐為預報資料，實際以中央氣象署與現場為準；靠海下層階梯遇警示請勿進入。</blockquote>
+    <div class="mt-6">
+      <BestPhotoWindow server:defer>
+        <ServerIslandFallback slot="fallback" label="正在計算今天的最佳拍照時段" rows={3} />
+      </BestPhotoWindow>
+    </div>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">怎麼用這份潮汐資訊</h2>
+      <div class="mt-5 grid gap-4 sm:grid-cols-2">
+        {
+          guide.map((g) => (
+            <article class="rounded-2xl border border-scale bg-white p-5">
+              <h3 class="flex items-center gap-2 text-base font-semibold text-deepsea">
+                <span aria-hidden="true">{g.emoji}</span>
+                {g.title}
+              </h3>
+              <p class="mt-2 text-sm leading-relaxed text-ink/80">{g.body}</p>
+            </article>
+          ))
+        }
+      </div>
     </section>
+
+    <section class="prose-cn mt-10">
+      <h2>潮汐為什麼每天都不一樣</h2>
+      <p>
+        潮汐主要來自月球與太陽的引潮力。地球自轉使同一地點一天通常出現兩次滿潮與兩次乾潮，而月球繞地球公轉、地球繞太陽公轉，
+        使滿潮時間每天平均延後約 50 分鐘，因此同一時刻的潮位天天不同。
+      </p>
+      <p>
+        當日、月、地三者接近一直線（朔、望，也就是新月與滿月），兩股引潮力方向接近而疊加，潮差變大形成<strong>大潮</strong>；
+        當日、月方向約成直角（上弦月、下弦月），引潮力互相抵消，潮差變小形成<strong>小潮</strong>。
+        這也是本頁以月相輔助說明潮差大小的原因。
+      </p>
+      <p>
+        此外，地形與氣象也會明顯改變實際水位：強勁的東北季風會把海水推往近岸，颱風或低壓系統造成的氣壓下降則會使水位抬升（風暴潮）。
+        因此在大風或颱風前後，實際水位可能明顯高於預報值，這也是本站不建議在警示期間靠近下層階梯的原因。
+      </p>
+
+      <h2>三種常見的判讀需求</h2>
+      <ul>
+        <li><strong>想拍海景倒影</strong>：挑接近滿潮的時段，並比對<a href="/sunset/">日落時間</a>。</li>
+        <li><strong>想看消波結構</strong>：挑接近乾潮的時段，注意階梯與石面溼滑。</li>
+        <li><strong>想帶小孩玩沙</strong>：挑退潮後、且距離下一次滿潮還有 2 小時以上的時段。</li>
+      </ul>
+      <blockquote>
+        潮汐為數值模式推算的預報資料，實際以中央氣象署潮汐預報與現場公告為準；靠海下層階梯遇警示請勿進入。
+      </blockquote>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">常見問題</h2>
+      <div class="mt-4 space-y-5">
+        {
+          faqs.map((f) => (
+            <div>
+              <h3 class="text-base font-semibold text-deepsea">{f.q}</h3>
+              <p class="mt-1.5 leading-relaxed text-ink/80">{f.a}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">延伸閱讀</h2>
+      <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+        <li class="rounded-xl border border-scale bg-white p-4">
+          <a href="/today/" class="font-semibold text-deepsea underline hover:text-sunset">今日狀況</a>
+          <p class="mt-1 text-sm text-ink/70">綜合天氣、風速、夕陽與潮汐的整體建議。</p>
+        </li>
+        <li class="rounded-xl border border-scale bg-white p-4">
+          <a href="/sunset/" class="font-semibold text-deepsea underline hover:text-sunset">日落時間</a>
+          <p class="mt-1 text-sm text-ink/70">找出最佳觀賞與拍攝窗口。</p>
+        </li>
+        <li class="rounded-xl border border-scale bg-white p-4">
+          <a href="/weather/" class="font-semibold text-deepsea underline hover:text-sunset">天氣與海象</a>
+          <p class="mt-1 text-sm text-ink/70">風速、陣風、降雨與一週預報。</p>
+        </li>
+        <li class="rounded-xl border border-scale bg-white p-4">
+          <a href="/responsibility/" class="font-semibold text-deepsea underline hover:text-sunset">科普與訪客責任</a>
+          <p class="mt-1 text-sm text-ink/70">瘋狗浪、離岸流與溼滑環境的安全觀念。</p>
+        </li>
+      </ul>
+    </section>
+
+    <SourceBlock
+      sources={[
+        { label: '中央氣象署潮汐預報', href: 'https://www.cwa.gov.tw/V8/C/T/Marine.html' },
+        { label: '中央氣象署（海象與長浪警示）', href: 'https://www.cwa.gov.tw/' },
+        { label: '交通部中央氣象署氣象資料開放平臺', href: 'https://opendata.cwa.gov.tw/' },
+        { label: '海洋委員會海巡署（海域安全宣導）', href: 'https://www.cga.gov.tw/' },
+      ]}
+    />
   </div>
 </BaseLayout>

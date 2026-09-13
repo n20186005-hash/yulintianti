@@ -1,0 +1,205 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import SourceBlock from '../../components/SourceBlock.astro';
+import { breadcrumb, faqPage } from '../../lib/schema';
+import seasons from '../../data/seasons.json';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '四季遊覽策略', href: '/seasons/' },
+];
+
+const faqs = [
+  {
+    q: '南寮魚鱗天梯一年之中什麼季節最適合去？',
+    a: '春季（3 至 5 月）與秋季（9 至 11 月）通常最舒適：氣溫適中、能見度佳，風勢也較夏季穩定。秋季風勢轉強，是放風箏與拍攝通透天空的好時機；冬季風強偏冷，但也是賞候鳥的重點季節。',
+  },
+  {
+    q: '夏季去要注意什麼？',
+    a: '夏季高溫且午後雷陣雨頻繁，7 至 9 月為颱風主要影響期。建議清晨或日落前後前往、補充足夠水分與防曬；遇到雷雨、颱風或長浪警示時請勿靠近海岸與下層階梯。',
+  },
+  {
+    q: '為什麼新竹海邊風這麼大？',
+    a: '新竹冬季受東北季風影響，加上地形夾峙產生的風道效應，風勢明顯強於其他地區，因此有「風城」之稱；農曆九月前後的強風俗稱「九降風」。海岸缺少遮蔽，風速通常又高於市區。',
+  },
+  {
+    q: '這裡可以看到哪些生態？',
+    a: '新竹沿海（含香山濕地一帶）擁有北台灣重要的潮間帶生態，可見多種招潮蟹與彈塗魚；每年秋季至隔年春季為候鳥度冬與過境期，鷺科、鷸鴴科與雁鴨科是常見族群。',
+  },
+  {
+    q: '海水看起來濁濁的是污染嗎？',
+    a: '不一定。近岸濁度會受潮汐、河川逕流與降雨影響，雨後短期上升屬自然現象；但若有異常顏色、氣味或大量廢棄物，請通報環保主管機關。',
+  },
+];
+
+const rows = [
+  { key: 'weather', label: '天氣特徵' },
+  { key: 'temp', label: '氣溫概況' },
+  { key: 'wind', label: '風勢' },
+  { key: 'sea', label: '海象' },
+  { key: 'eco', label: '生態亮點' },
+  { key: 'water', label: '水質／海水' },
+  { key: 'advice', label: '遊覽建議' },
+] as const;
+---
+
+<BaseLayout
+  title="南寮魚鱗天梯四季遊覽策略與生態｜氣象、海象與候鳥觀察重點"
+  description="南寮魚鱗天梯四季攻略：春、夏、秋、冬的天氣特徵、氣溫、風勢、海象、水質與生態亮點，並附 12 個月的生態觀察日曆與候鳥季節整理。"
+  jsonLd={[breadcrumb(crumbs), faqPage(faqs)]}
+>
+  <div class="mx-auto max-w-4xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">四季遊覽策略與生態</h1>
+    <p class="mt-3 leading-relaxed text-ink/80">
+      新竹沿海位於台灣西北角，同時受到東北季風、西南氣流與颱風的影響，四季差異非常明顯。同一個地點，夏天與冬天的風速、浪高與體感可以相差一倍以上。這一頁把<strong>氣象、海象、水質與生態</strong>整合成四季策略，幫你選對季節與時段。
+    </p>
+    <p class="mt-3 rounded-xl border border-scale bg-scale/40 p-4 text-sm leading-relaxed text-ink/75">
+      {seasons.climateNote}
+    </p>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">四季綜合策略表</h2>
+      <div class="mt-4 overflow-x-auto rounded-xl border border-scale">
+        <table class="w-full min-w-[720px] border-collapse text-sm">
+          <thead>
+            <tr class="bg-deepsea text-left text-white">
+              <th class="px-4 py-3 font-semibold">項目</th>
+              {
+                seasons.seasons.map((s) => (
+                  <th class="px-4 py-3 font-semibold">
+                    {s.emoji} {s.name}
+                    <span class="block text-xs font-normal text-scale/80">{s.months}</span>
+                  </th>
+                ))
+              }
+            </tr>
+          </thead>
+          <tbody>
+            {
+              rows.map((r, i) => (
+                <tr class:list={[i % 2 ? 'bg-scale/50' : 'bg-white']}>
+                  <th class="whitespace-nowrap bg-white px-4 py-3 text-left font-semibold text-deepsea">
+                    {r.label}
+                  </th>
+                  {seasons.seasons.map((s) => (
+                    <td class="px-4 py-3 align-top leading-relaxed text-ink/80">{(s as any)[r.key]}</td>
+                  ))}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">逐季重點</h2>
+      <div class="mt-5 grid gap-4 sm:grid-cols-2">
+        {
+          seasons.seasons.map((s) => (
+            <article class="rounded-2xl border border-scale bg-white p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="text-lg font-semibold text-deepsea">
+                  <span aria-hidden="true">{s.emoji}</span> {s.name}
+                </h3>
+                <span class="shrink-0 rounded-full bg-scale px-2.5 py-0.5 text-xs text-ink/70">{s.months}</span>
+              </div>
+              <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-sunset">{s.tag}</p>
+              <p class="mt-3 text-sm leading-relaxed text-ink/80">{s.weather}</p>
+              <ul class="mt-3 space-y-1.5 text-sm text-ink/75">
+                <li>
+                  <strong class="text-deepsea">風勢：</strong>{s.wind}
+                </li>
+                <li>
+                  <strong class="text-deepsea">海象：</strong>{s.sea}
+                </li>
+                <li>
+                  <strong class="text-deepsea">生態：</strong>{s.eco}
+                </li>
+              </ul>
+              <p class="mt-3 rounded-lg bg-scale/70 p-3 text-sm leading-relaxed text-ink/80">
+                <strong class="text-deepsea">建議：</strong>{s.advice}
+              </p>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">12 個月生態觀察日曆</h2>
+      <p class="mt-2 text-sm text-ink/70">
+        以下為歷年常見的觀察重點，實際出現時間與物種會受當年氣候影響而提前或延後。
+      </p>
+      <ul class="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          seasons.ecoCalendar.map((m) => (
+            <li class="rounded-xl border border-scale bg-white p-3.5">
+              <div class="text-sm font-semibold text-deepsea">{m.month}</div>
+              <p class="mt-1 text-sm leading-relaxed text-ink/75">{m.focus}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="mt-10 grid gap-6 lg:grid-cols-2">
+      <div>
+        <h2 class="text-2xl">水質與海水的觀察方式</h2>
+        <dl class="mt-4 space-y-3">
+          {
+            seasons.waterNotes.map((w) => (
+              <div class="rounded-xl border border-scale bg-white p-4">
+                <dt class="text-sm font-semibold text-deepsea">{w.label}</dt>
+                <dd class="mt-1 text-sm leading-relaxed text-ink/75">{w.detail}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+
+      <div>
+        <h2 class="text-2xl">生態與保育</h2>
+        <dl class="mt-4 space-y-3">
+          {
+            seasons.ecoNotes.map((e) => (
+              <div class="rounded-xl border border-scale bg-white p-4">
+                <dt class="text-sm font-semibold text-deepsea">{e.label}</dt>
+                <dd class="mt-1 text-sm leading-relaxed text-ink/75">{e.detail}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <p class="mt-3 text-sm text-ink/70">
+          更多安全與保育守則請見<a href="/responsibility/" class="underline">科普與訪客責任</a>。
+        </p>
+      </div>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">常見問題</h2>
+      <div class="mt-4 space-y-5">
+        {
+          faqs.map((f) => (
+            <div>
+              <h3 class="text-base font-semibold text-deepsea">{f.q}</h3>
+              <p class="mt-1.5 leading-relaxed text-ink/80">{f.a}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <SourceBlock
+      sources={[
+        { label: '中央氣象署（氣候統計與天氣預報）', href: 'https://www.cwa.gov.tw/' },
+        { label: '中央氣象署氣象資料開放平臺', href: 'https://opendata.cwa.gov.tw/' },
+        { label: '新竹市政府香山濕地生態網', href: 'https://ssw.hccg.gov.tw/' },
+        { label: '農業部林業及自然保育署', href: 'https://www.forest.gov.tw/' },
+        { label: '農業部生物多樣性研究所（生態資料）', href: 'https://www.tesri.gov.tw/' },
+      ]}
+    />
+  </div>
+</BaseLayout>

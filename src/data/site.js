@@ -1,7 +1,8 @@
 // 全站基本設定（無資料庫、純靜態）
 export const SITE = {
   name: '南寮魚鱗天梯',
-  fullName: '南寮魚鱗天梯｜南寮漁港旅遊指南',
+  // 網站全名（用於 WebSite 結構化資料與品牌比較）
+  siteTitle: '南寮魚鱗天梯｜南寮漁港旅遊指南',
   slogan: '看海、追夕陽，玩懂南寮',
   url: 'https://yulintianti.com',
   lang: 'zh-Hant-TW',
@@ -43,8 +44,30 @@ export const SITE = {
   // 官方旅遊資訊（E-E-A-T 出站權威連結）
   govtTourismUrl: 'https://tourism.hccg.gov.tw/',
   govtTourismLabel: '新竹市政府觀光旅遊網',
-  // Google 地圖評價（僅用於頁面顯示參考，不加入 JSON-LD aggregateRating）
-  googleRating: { value: 4.2, count: 5983 },
+  // Google 地圖評價；官方全稱與類別亦取自該 Google 地圖地點頁
+  googleRating: {
+    value: 4.2,
+    count: 5996,
+    // 是否輸出為 JSON-LD 的 aggregateRating（僅用於「南寮魚鱗天梯」實體頁面）
+    // 取捨：評分來自 Google 地圖（第三方），Google 對複製第三方評分的複合摘要態度保守，
+    // 可能不予採用；因此頁面上必須同時清楚標註來源（見 GoogleRating.astro），
+    // 且不得套用到南寮漁港、風箏賽場等其他實體。若收到複合摘要警告可改為 false。
+    includeInJsonLd: true,
+    // 頁面顯示時必須同步標註的來源資訊（禁止只寫數字不寫來源）
+    sourceLabel: 'Google 地圖使用者評價',
+    sourceUrl: 'https://maps.app.goo.gl/PAGBgo7yN5czhQnJA',
+    placeName: 'Nanliao Stairway（南寮魚鱗天梯）',
+    category: 'Tourist attraction',
+    checkedAt: '2026-09-13',
+  },
+  // 完整郵寄地址（JSON-LD 與頁面顯示共用）
+  address: {
+    en: 'Xingang Rd, North District, Hsinchu City, Taiwan 300',
+    zh: '臺灣新竹市北區新港路',
+    street: '新港路',
+    district: '北區',
+    city: '新竹市',
+  },
 };
 
 // 全站統一的導航連結：使用 Google 地圖地點的精確座標，避免同名地點誤判
@@ -68,7 +91,7 @@ export const FOOTER_NAV = [
     title: '出發前必看',
     links: [
       { label: '今日狀況', href: '/today/' },
-      { label: '潮汐表', href: '/tide/' },
+      { label: '即時潮汐', href: '/tide/' },
       { label: '日落時間', href: '/sunset/' },
       { label: '天氣與海象', href: '/weather/' },
       { label: '停車攻略', href: '/parking/' },
@@ -85,6 +108,16 @@ export const FOOTER_NAV = [
       { label: '國際風箏賽場', href: '/kite-field/' },
       { label: '17公里海岸線', href: '/17km-coastline/' },
       { label: '景點地圖', href: '/map/' },
+    ],
+  },
+  {
+    title: '深度認識',
+    links: [
+      { label: '歷史與故事', href: '/history/' },
+      { label: '四季與生態', href: '/seasons/' },
+      { label: '訪客服務與設施', href: '/facilities/' },
+      { label: '人群定制方案', href: '/audiences/' },
+      { label: '科普與訪客責任', href: '/responsibility/' },
     ],
   },
   {

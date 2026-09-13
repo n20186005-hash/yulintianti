@@ -1,190 +1,255 @@
 ---
-// 即時天氣卡：透過 /api/weather（Cloudflare Pages Function 代理 Open-Meteo）載入
-// context="home" 為首頁精簡版（附「查看完整」連結）；"full" 為天氣頁完整版
+/**
+ * 即時天氣模組（伺服器端渲染）
+ * 由伺服器島嶼呼叫：頁面其餘部分維持靜態，本模組於邊緣節點即時產生並快取。
+ * context="home" 為首頁精簡版；"full" 為天氣頁完整版（含逐時與 7 日預報）。
+ *
+ * 模組順序：可執行建議（風險置頂）→ 現況數據 → 逐時預報 → 一週預報。
+ */
+import { weatherInfo } from '../lib/weather';
+import { getWeather, nextHours, rainProbNow } from '../lib/weather-server';
+import { getTide, minutesUntil } from '../lib/tide-server';
+import { buildAdvice, beaufort } from '../lib/weather-advice';
+import { relativeDayLabel, formatMonthDay } from '../lib/format';
+import WeatherAdvice from './WeatherAdvice.astro';
+
 interface Props {
   context?: 'home' | 'full';
 }
 const { context = 'full' } = Astro.props;
 const isHome = context === 'home';
+
+const now = new Date();
+const [wx, tide] = await Promise.all([getWeather(), getTide(now)]);
+
+const DIRS = ['北', '東北', '東', '東南', '南', '西南', '西', '西北'];
+const dirLabel = (deg: number) => DIRS[Math.round(deg / 45) % 8];
+const r = (n: number) => Math.round(n);
+const hhmm = (iso: string) => (iso.length >= 16 ? iso.slice(11, 16) : '--:--');
+
+const updatedLabel = wx
+  ? (() => {
+      const t = new Date(new Date(wx.fetchedAt).getTime() + 8 * 3600 * 1000);
+      return `${String(t.getUTCHours()).padStart(2, '0')}:${String(t.getUTCMinutes()).padStart(2, '0')}`;
+    })()
+  : null;
+
+const cur = wx?.current;
+const wxInfo = cur ? weatherInfo(cur.weatherCode) : null;
+const rainProb = wx ? rainProbNow(wx) : 0;
+
+const hourly = wx && !isHome ? nextHours(wx, 12) : [];
+const dayList = wx ? (isHome ? wx.days.slice(0, 3) : wx.days) : [];
+
+// 建議引擎：把天氣與海象數值轉成可執行的建議（含海岸專屬的浪高、水溫、潮汐判斷）
+const advice =
+  wx && wx.days[0]
+    ? buildAdvice(
+        {
+          current: wx.current,
+          today: wx.days[0],
+          tomorrow: wx.days[1],
+          next12: nextHours(wx, 12),
+          rainNow: rainProb,
+          sunset: hhmm(wx.days[0].sunset),
+          marine: tide
+            ? {
+                waveHeight: tide.waveHeight,
+                seaTemp: tide.seaTemp,
+                nextHighTime: tide.nextHigh?.time ?? null,
+                nextHighHeightM: tide.nextHigh?.heightM ?? null,
+                nextLowTime: tide.nextLow?.time ?? null,
+                nextLowHeightM: tide.nextLow?.heightM ?? null,
+                minutesToHigh: tide.nextHigh ? minutesUntil(tide.nextHigh, now) : null,
+                minutesToLow: tide.nextLow ? minutesUntil(tide.nextLow, now) : null,
+              }
+            : null,
+        },
+        { compact: isHome }
+      )
+    : null;
+
+const metric = (label: string, value: string) => ({ label, value });
+
+/** 紫外線強度白話分級 */
+const uvWord = (v: number) => (v >= 11 ? '極強' : v >= 8 ? '強' : v >= 5 ? '中等' : '弱');
+
+const metrics = cur
+  ? [
+      metric('降雨機率', `${rainProb}%`),
+      metric('平均風速', `每秒 ${r(cur.windSpeed)} 公尺（約 ${beaufort(cur.windSpeed)} 級）`),
+      metric('陣風', `每秒 ${r(cur.windGust)} 公尺（約 ${beaufort(cur.windGust)} 級）`),
+      ...(isHome
+        ? []
+        : [
+            metric('風向', `${dirLabel(cur.windDirection)}風`),
+            metric('體感溫度', `${r(cur.apparent)}°C`),
+            metric('紫外線', wx && wx.days[0] ? `${uvWord(wx.days[0].uvMax)}（最高 ${r(wx.days[0].uvMax)}）` : '—'),
+            metric('目前降雨', `${cur.precipitation.toFixed(1)} 毫米`),
+            metric('雲量', `${r(cur.cloudCover)}%`),
+            metric('浪高', tide && tide.waveHeight !== null ? `${tide.waveHeight.toFixed(1)} 公尺` : '—'),
+            metric('海水溫度', tide && tide.seaTemp !== null ? `${tide.seaTemp.toFixed(1)}°C` : '—'),
+          ]),
+    ]
+  : [];
 ---
 
 <section
   aria-labelledby="wx-heading"
   class="rounded-2xl border border-scale bg-white p-6 shadow-sm"
-  data-weather-card
-  data-context={context}
-  aria-busy="true"
 >
-  <div class="flex items-center justify-between gap-3">
+  <div class="flex flex-wrap items-start justify-between gap-3">
     <div>
-      <p class="text-xs font-semibold uppercase tracking-wide text-coast">☀️ 南寮即時天氣</p>
-      <h2 id="wx-heading" class="mt-0.5 text-xl">{isHome ? '今天的南寮天氣' : '南寮即時天氣與三日預報'}</h2>
+      <p class="text-xs font-semibold uppercase tracking-wide text-coast">☀️ 南寮海岸現況</p>
+      <h2 id="wx-heading" class="mt-0.5 text-xl">
+        {isHome ? '今天的南寮天氣' : '南寮即時天氣與一週預報'}
+      </h2>
     </div>
-    <span id="wx-updated" class="shrink-0 text-xs text-ink/50" aria-live="polite"></span>
-  </div>
-
-  <!-- 提醒區（雷雨、強風、高溫） -->
-  <div id="wx-alerts" class="mt-4 space-y-2"></div>
-
-  <!-- 載入中骨架 -->
-  <div id="wx-loading" class="mt-4 animate-pulse">
-    <div class="h-20 rounded-xl bg-scale"></div>
-    <div class="mt-3 grid grid-cols-3 gap-3">
-      <div class="h-16 rounded-lg bg-scale"></div>
-      <div class="h-16 rounded-lg bg-scale"></div>
-      <div class="h-16 rounded-lg bg-scale"></div>
-    </div>
-  </div>
-
-  <!-- 即時天氣內容（由 JS 填入） -->
-  <div id="wx-current" class="mt-4 hidden"></div>
-  <div id="wx-daily" class="mt-6 hidden"></div>
-
-  <!-- 錯誤／備援 -->
-  <div id="wx-error" class="mt-4 hidden rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-    即時天氣暫時無法載入。請改參考
-    <a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener" class="underline">中央氣象署</a>。
+    {updatedLabel && <span class="shrink-0 text-xs text-ink/50">更新於 {updatedLabel}</span>}
   </div>
 
   {
+    !wx && (
+      <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <p>即時天氣暫時無法取得，請稍後重新整理，或參考下方官方資訊。</p>
+        <p class="mt-2">
+          <a
+            href="https://www.cwa.gov.tw/V8/C/W/County/County.html?CID=10018"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline"
+          >
+            中央氣象署新竹市天氣
+          </a>
+          ｜
+          <a href="/today/" class="underline">今日狀況</a>
+        </p>
+      </div>
+    )
+  }
+
+  {
+    advice && (
+      <div class="mt-4">
+        <h3 class="text-base font-semibold text-deepsea">
+          {isHome ? '今天怎麼安排' : '依目前預報給你的建議'}
+        </h3>
+        <WeatherAdvice advice={advice} compact={isHome} />
+      </div>
+    )
+  }
+
+  {
+    cur && wxInfo && (
+      <>
+        <h3 class="mt-6 text-base font-semibold text-deepsea">現在的天氣與海象</h3>
+        <div class="mt-3 flex flex-wrap items-center gap-5 rounded-xl bg-scale/60 p-4">
+          <div class="text-5xl" aria-hidden="true">{wxInfo.emoji}</div>
+          <div>
+            <div class="text-3xl font-bold text-deepsea">{r(cur.temperature)}°C</div>
+            <div class="text-sm text-ink/70">
+              {wxInfo.label}・體感 {r(cur.apparent)}°C
+            </div>
+            {wx.days[0] && (
+              <div class="mt-0.5 text-sm text-ink/70">
+                今日 {r(wx.days[0].tempMin)}–{r(wx.days[0].tempMax)}°C・降雨機率 {rainProb}%
+              </div>
+            )}
+          </div>
+        </div>
+
+        <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {metrics.map((m) => (
+            <div class="rounded-lg bg-scale/70 px-3 py-3">
+              <dt class="text-xs text-ink/60">{m.label}</dt>
+              <dd class="mt-0.5 text-lg font-semibold text-deepsea">{m.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </>
+    )
+  }
+
+  {
+    hourly.length > 0 && (
+      <div class="mt-6">
+        <h3 class="text-base font-semibold text-deepsea">未來 12 小時</h3>
+        <div class="mt-3 -mx-1 overflow-x-auto pb-1">
+          <ul class="flex min-w-max gap-2 px-1">
+            {hourly.map((h) => {
+              const w = weatherInfo(h.weatherCode);
+              return (
+                <li class="w-[74px] shrink-0 rounded-xl border border-scale bg-white p-2.5 text-center">
+                  <div class="text-xs font-semibold text-deepsea">
+                    {String(h.hour).padStart(2, '0')}:00
+                  </div>
+                  <div class="my-1 text-xl" aria-hidden="true">{w.emoji}</div>
+                  <div class="text-sm font-semibold text-deepsea">{r(h.temperature)}°</div>
+                  <div class="text-[11px] text-ink/60">雨 {h.precipProb}%</div>
+                  <div class="text-[11px] text-ink/60">風 {r(h.windSpeed)}</div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+        <p class="mt-2 text-xs text-ink/55">「風」為平均風速（公尺／秒）；海岸實際風力通常高於市區。</p>
+      </div>
+    )
+  }
+
+  {
+    dayList.length > 0 && (
+      <div class="mt-6">
+        <h3 class="text-base font-semibold text-deepsea">{isHome ? '未來幾天' : '未來一週預報'}</h3>
+        <div class:list={['mt-3 grid gap-3', isHome ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-7']}>
+          {dayList.map((d, i) => {
+            const w = weatherInfo(d.weatherCode);
+            return (
+              <div class="rounded-xl border border-scale p-3 text-center">
+                <div class="text-sm font-semibold text-deepsea">{relativeDayLabel(i)}</div>
+                <div class="text-[11px] text-ink/55">{formatMonthDay(d.date)}</div>
+                <div class="my-1 text-2xl" aria-hidden="true">{w.emoji}</div>
+                <div class="text-[11px] text-ink/70">{w.label}</div>
+                <div class="mt-1.5 text-sm">
+                  <span class="font-semibold text-deepsea">{r(d.tempMax)}°</span>
+                  <span class="text-ink/50"> / {r(d.tempMin)}°</span>
+                </div>
+                <div class="text-[11px] text-ink/60">降雨 {d.precipProb}%</div>
+                <div class="text-[11px] text-ink/60">陣風 {r(d.gustMax)} m/s</div>
+                {!isHome && (
+                  <div class="mt-1.5 border-t border-scale pt-1.5 text-[11px] text-ink/55">
+                    <div>日出 {hhmm(d.sunrise)}・日落 {hhmm(d.sunset)}</div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    )
+  }
+
+  {
     isHome ? (
-      <a href="/weather/" class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-deepsea hover:text-sunset">
-        查看完整天氣與海象 →
+      <a
+        href="/weather/"
+        class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-deepsea hover:text-sunset"
+      >
+        查看完整天氣與一週預報 →
       </a>
     ) : (
       <p class="mt-4 text-xs leading-relaxed text-ink/55">
-        資料來源：Open-Meteo，經本站邊緣快取約 15 分鐘，為預報資料，實際以
-        <a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener" class="underline">中央氣象署</a>及現場公告為準。
+        上面的建議是依即時預報推估的，並非官方氣象警報；實際天氣、風力與海象可能與預報有落差，請以
+        <a
+          href="https://www.cwa.gov.tw/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline"
+        >
+          中央氣象署
+        </a>
+        發布的最新資訊及現場公告為準。天候不佳時請勿進入下層階梯。
       </p>
     )
   }
 </section>
-
-<script>
-  import { weatherInfo, buildAlerts } from '../lib/weather';
-  import { relativeDayLabel } from '../lib/format';
-
-  const COMPASS = ['北', '東北', '東', '東南', '南', '西南', '西', '西北'];
-  const dirLabel = (deg: number) => COMPASS[Math.round(deg / 45) % 8];
-  const r = (n: number) => Math.round(n);
-
-  document.querySelectorAll<HTMLElement>('[data-weather-card]').forEach((card) => {
-    const isHome = card.dataset.context === 'home';
-    const q = (id: string) => card.querySelector('#' + id) as HTMLElement | null;
-
-    async function load() {
-      try {
-        const res = await fetch('/api/weather', { headers: { accept: 'application/json' } });
-        if (!res.ok) throw new Error('http ' + res.status);
-        const data = await res.json();
-        if (!data.current) throw new Error('no data');
-        render(data);
-      } catch {
-        q('wx-loading')?.classList.add('hidden');
-        q('wx-error')?.classList.remove('hidden');
-        card.setAttribute('aria-busy', 'false');
-      }
-    }
-
-    function render(data: any) {
-      const c = data.current;
-      const wx = weatherInfo(c.weather_code);
-
-      // 即時降雨機率：取當前整點的 hourly 值
-      let precipProb = 0;
-      const hh = data.hourly;
-      if (hh?.time) {
-        let idx = hh.time.indexOf(c.time);
-        if (idx < 0) idx = hh.time.findIndex((t: string) => t.slice(0, 13) === c.time.slice(0, 13));
-        if (idx >= 0) precipProb = hh.precipitation_probability[idx] ?? 0;
-      }
-      if (!precipProb && data.daily?.precipitation_probability_max)
-        precipProb = data.daily.precipitation_probability_max[0] ?? 0;
-
-      // 提醒
-      const alerts = buildAlerts({
-        weatherCode: c.weather_code,
-        windMs: c.wind_speed_10m,
-        gustMs: c.wind_gusts_10m,
-        apparentTemp: c.apparent_temperature,
-        todayWeatherCode: data.daily?.weather_code?.[0],
-        todayGustMax: data.daily?.wind_gusts_10m_max?.[0],
-        todayTempMax: data.daily?.temperature_2m_max?.[0],
-      });
-      const alertBox = q('wx-alerts');
-      if (alertBox)
-        alertBox.innerHTML = alerts
-          .map((a) => {
-            const cls =
-              a.level === 'danger'
-                ? 'border-rose-200 bg-rose-50 text-rose-800'
-                : 'border-amber-200 bg-amber-50 text-amber-900';
-            return `<div class="flex items-start gap-2 rounded-xl border ${cls} p-3 text-sm"><span aria-hidden="true">⚠️</span><p>${a.text}</p></div>`;
-          })
-          .join('');
-
-      // 即時天氣主卡
-      const metric = (label: string, value: string) =>
-        `<div class="rounded-lg bg-scale/70 px-3 py-3"><dt class="text-xs text-ink/60">${label}</dt><dd class="mt-0.5 text-lg font-semibold text-deepsea">${value}</dd></div>`;
-
-      // 首頁精簡版顯示 3 項核心指標；完整版顯示 6 項
-      const metrics = [
-        metric('降雨機率', precipProb + '%'),
-        metric('平均風速', '每秒 ' + r(c.wind_speed_10m) + ' 公尺'),
-        metric('陣風', '每秒 ' + r(c.wind_gusts_10m) + ' 公尺'),
-      ];
-      if (!isHome) {
-        metrics.push(
-          metric('風向', dirLabel(c.wind_direction_10m) + '風'),
-          metric('相對溼度', c.relative_humidity_2m + '%'),
-          metric('目前降雨', c.precipitation + ' mm')
-        );
-      }
-
-      const cur = q('wx-current');
-      if (cur)
-        cur.innerHTML = `
-          <div class="flex items-center gap-4 rounded-xl bg-scale/60 p-4">
-            <div class="text-5xl" aria-hidden="true">${wx.emoji}</div>
-            <div>
-              <div class="text-3xl font-bold text-deepsea">${r(c.temperature_2m)}°C</div>
-              <div class="text-sm text-ink/70">${wx.label}・體感 ${r(c.apparent_temperature)}°C</div>
-            </div>
-          </div>
-          <dl class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">${metrics.join('')}</dl>`;
-
-      // 三日預報
-      const d = data.daily;
-      const daily = q('wx-daily');
-      if (d?.time && daily) {
-        const cards = d.time
-          .map((t: string, i: number) => {
-            const w = weatherInfo(d.weather_code[i]);
-            return `<div class="rounded-xl border border-scale p-4 text-center">
-              <div class="text-sm font-semibold text-deepsea">${relativeDayLabel(i)}</div>
-              <div class="my-1 text-3xl" aria-hidden="true">${w.emoji}</div>
-              <div class="text-xs text-ink/70">${w.label}</div>
-              <div class="mt-2 text-sm"><span class="font-semibold text-deepsea">${r(d.temperature_2m_max[i])}°</span> <span class="text-ink/50">/ ${r(d.temperature_2m_min[i])}°</span></div>
-              <div class="mt-1 text-xs text-ink/60">降雨 ${d.precipitation_probability_max[i]}%</div>
-              <div class="text-xs text-ink/60">陣風 ${r(d.wind_gusts_10m_max[i])} m/s</div>
-            </div>`;
-          })
-          .join('');
-        daily.innerHTML = `<h3 class="mb-3 text-base font-semibold text-deepsea">三日預報</h3><div class="grid grid-cols-3 gap-3">${cards}</div>`;
-      }
-
-      // 更新時間
-      const t = new Date(data._cachedAt ?? Date.now());
-      const upd = q('wx-updated');
-      if (upd)
-        upd.textContent = `更新於 ${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
-
-      q('wx-loading')?.classList.add('hidden');
-      q('wx-current')?.classList.remove('hidden');
-      q('wx-daily')?.classList.remove('hidden');
-      card.setAttribute('aria-busy', 'false');
-    }
-
-    load();
-  });
-</script>

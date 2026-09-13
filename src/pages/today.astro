@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import TodayStatus from '../components/TodayStatus.astro';
+import ServerIslandFallback from '../components/ServerIslandFallback.astro';
 import notices from '../data/notices.json';
 import { breadcrumb } from '../lib/schema';
 
@@ -24,7 +25,9 @@ const crumbs = [
     </p>
 
     <div class="mt-6">
-      <TodayStatus compact={true} />
+      <TodayStatus compact={true} server:defer>
+        <ServerIslandFallback slot="fallback" label="正在確認今日狀況" />
+      </TodayStatus>
     </div>
 
     <section class="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-5">
@@ -47,8 +50,12 @@ const crumbs = [
         並留意<a href="/weather/">天氣與海象</a>、<a href="/tide/">潮汐</a>與<a href="/sunset/">日落時間</a>。
       </p>
       <blockquote>
-        提醒：本頁天氣為預報示意，實際請以官方即時資料與現場公告為準。若即時資料暫時無法更新，會顯示最後成功更新時間，並提供中央氣象署入口。
+        提醒：本頁天氣與潮汐為數值模式預報結果，實際請以官方即時資料與現場公告為準。若即時資料暫時無法取得，會標示更新時間並提供中央氣象署入口，不以舊資料充當即時資訊。
       </blockquote>
+      <p>
+        潮汐屬低速變化量，但風浪可能在數十分鐘內明顯改變。若你打算走下階梯或在沙灘長時間活動，
+        請務必再看一次<a href="/tide/">即時潮汐</a>的下一次滿潮時間，並預留回程時間。
+      </p>
     </section>
   </div>
 </BaseLayout>

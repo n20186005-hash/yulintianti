@@ -1,0 +1,46 @@
+---
+/**
+ * 行動端固定快捷列
+ * 本站行動裝置流量佔比高，而搜尋需求高度集中在「天氣、潮汐、導航」三件事，
+ * 因此把它們固定在畫面底部，讓手機使用者不必捲動或打開選單即可抵達。
+ * 桌機版已有頂部「立即導航」與完整主選單，故此列僅在 md 以下顯示。
+ */
+import { NAV_DEST_URL } from '../data/site.js';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) => path.startsWith(href);
+
+const actions = [
+  { label: '今日天氣', href: '/weather/', icon: '🌤️', external: false },
+  { label: '潮汐時間', href: '/tide/', icon: '🌊', external: false },
+  { label: '導航', href: NAV_DEST_URL, icon: '📍', external: true },
+];
+---
+
+<nav
+  aria-label="快速前往"
+  class="fixed inset-x-0 bottom-0 z-40 border-t border-scale bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+>
+  <ul class="grid grid-cols-3">
+    {
+      actions.map((a) => (
+        <li>
+          <a
+            href={a.href}
+            target={a.external ? '_blank' : undefined}
+            rel={a.external ? 'noopener' : undefined}
+            class:list={[
+              'flex flex-col items-center gap-0.5 px-2 py-2 text-xs font-medium transition-colors',
+              !a.external && isActive(a.href) ? 'text-sunset' : 'text-deepsea',
+            ]}
+            aria-current={!a.external && isActive(a.href) ? 'page' : undefined}
+          >
+            <span class="text-lg leading-none" aria-hidden="true">{a.icon}</span>
+            <span>{a.label}</span>
+            {a.external && <span class="sr-only">（開啟 Google 地圖導航）</span>}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>

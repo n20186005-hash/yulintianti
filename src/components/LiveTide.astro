@@ -1,0 +1,484 @@
+---
+/**
+ * 即時潮汐看板（伺服器端渲染）
+ * 由伺服器島嶼呼叫：頁面其餘部分維持靜態，本模組於邊緣節點即時產生並快取。
+ * context="home" 為首頁精簡版；"full" 為潮汐頁完整版（含 24 小時潮位曲線、7 日潮汐表與閱讀指南）。
+ */
+import { SITE } from '../data/site.js';
+import { getSunset } from '../lib/sunset';
+import { formatMonthDay } from '../lib/format';
+import {
+  getTide,
+  minutesUntil,
+  formatCountdown,
+  nowInTaipeiISO,
+  type TideEvent,
+} from '../lib/tide-server';
+import TideTable from './TideTable.astro';
+
+interface Props {
+  context?: 'home' | 'full';
+}
+const { context = 'full' } = Astro.props;
+const isHome = context === 'home';
+
+const tide = await getTide();
+const now = new Date();
+const sunset = getSunset(now, SITE.geo.lat, SITE.geo.lng);
+
+/** 台北時區的今日日期與現在時刻（epoch），用於判斷潮汐事件是否已發生 */
+const nowISO = nowInTaipeiISO(now);
+const todayDate = nowISO.slice(0, 10);
+const nowMs = Date.parse(`${nowISO}:00Z`);
+
+const updatedLabel = tide
+  ? (() => {
+      const t = new Date(new Date(tide.fetchedAt).getTime() + 8 * 3600 * 1000);
+      return `${String(t.getUTCHours()).padStart(2, '0')}:${String(t.getUTCMinutes()).padStart(2, '0')}`;
+    })()
+  : null;
+
+const level = tide?.current.level ?? null;
+const today = tide?.today ?? null;
+
+// —— 目前潮位在今日高低潮之間的位置 ——
+const levelPct =
+  level !== null && today && today.highMax > today.lowMin
+    ? Math.min(100, Math.max(0, ((level - today.lowMin) / (today.highMax - today.lowMin)) * 100))
+    : null;
+
+const trendIcon: Record<string, string> = {
+  rising: '▲',
+  falling: '▼',
+  high: '●',
+  low: '○',
+  unknown: '—',
+};
+
+const nextHigh = tide?.nextHigh ?? null;
+const nextLow = tide?.nextLow ?? null;
+const toMin = (e: TideEvent | null) => minutesUntil(e, now);
+
+// —— 24 小時潮位曲線 ——
+const points = tide?.next24 ?? [];
+const W = 640;
+const H = 190;
+const PL = 40;
+const PR = 14;
+const PT = 22;
+const PB = 30;
+const innerW = W - PL - PR;
+const innerH = H - PT - PB;
+
+const levels = points.map((p) => p.level);
+const lo = levels.length ? Math.min(0, ...levels) : 0;
+const hi = levels.length ? Math.max(0, ...levels) : 1;
+const padV = Math.max(0.2, (hi - lo) * 0.12);
+const yMin = lo - padV;
+const yMax = hi + padV;
+
+const xAt = (i: number) => PL + (innerW * i) / Math.max(1, points.length - 1);
+const yAt = (v: number) => PT + innerH * (1 - (v - yMin) / (yMax - yMin));
+
+const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${xAt(i).toFixed(1)},${yAt(p.level).toFixed(1)}`).join(' ');
+const areaPath = points.length
+  ? `${linePath} L${xAt(points.length - 1).toFixed(1)},${(PT + innerH).toFixed(1)} L${xAt(0).toFixed(1)},${(PT + innerH).toFixed(1)} Z`
+  : '';
+
+const t0Ms = points.length ? Date.parse(`${points[0].time}:00Z`) : 0;
+const tEndMs = points.length ? t0Ms + (points.length - 1) * 3600000 : 0;
+const xOfMs = (ms: number) =>
+  PL + (innerW * ((ms - t0Ms) / 3600000)) / Math.max(1, points.length - 1);
+
+/** 「現在」在曲線上的位置（曲線自現在所在的整點起算） */
+const xNow = Math.min(W - PR, Math.max(PL, xOfMs(nowMs)));
+
+const markers = (tide?.days ?? [])
+  .flatMap((d) => d.events)
+  .filter((e) => e.at >= t0Ms && e.at <= tEndMs)
+  .map((e) => ({
+    ...e,
+    x: xOfMs(e.at),
+    y: yAt(e.heightM),
+    labelY: e.type === 'high' ? Math.max(PT + 9, yAt(e.heightM) - 11) : Math.min(H - PB - 2, yAt(e.heightM) + 17),
+  }));
+
+const hourTicks = points
+  .map((p, i) => ({ i, p }))
+  .filter(({ i }) => i % 6 === 0)
+  .map(({ i, p }) => ({ x: xAt(i), label: p.time.slice(11, 16), date: p.date }));
+
+const zeroY = yAt(0);
+
+// —— 觀賞建議（依今日實際潮時與日落時間組合）——
+const toMinutes = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
+const highVsSunset = nextHigh ? Math.abs(toMinutes(nextHigh.time) - toMinutes(sunset)) : null;
+const highNearSunset = highVsSunset !== null && highVsSunset <= 90;
+
+const advice: string[] = [];
+if (today) {
+  advice.push(
+    today.spring
+      ? `今日為大潮，潮差約 ${today.rangeM.toFixed(2)} 公尺，潮位升降速度快，漲潮時請留在上層步道觀察。`
+      : `今日為小潮，潮差約 ${today.rangeM.toFixed(2)} 公尺，潮位變化較和緩，適合長時間停留。`
+  );
+}
+if (nextHigh) {
+  advice.push(
+    `下一次滿潮在 ${nextHigh.time}（約 ${nextHigh.heightM.toFixed(2)} 公尺），滿潮前後 1 小時海水最貼近階梯，海景層次與倒影效果最好。`
+  );
+}
+if (nextLow) {
+  advice.push(
+    `下一次乾潮在 ${nextLow.time}（約 ${nextLow.heightM.toFixed(2)} 公尺），此時消波塊與潮間帶會露出，可觀察海岸結構，但階梯與石面溼滑請減速慢行。`
+  );
+}
+if (highVsSunset !== null) {
+  advice.push(
+    highNearSunset
+      ? `滿潮時間與日落（${sunset}）僅相差約 ${highVsSunset} 分鐘，是「滿潮 × 夕陽」同時出現的少見組合，建議提前 60 分鐘卡位。`
+      : `滿潮與日落（${sunset}）相差約 ${Math.round(highVsSunset / 60)} 小時，若想同時拍到倒影與夕陽，可選擇滿潮時段先拍海景，再留到日落拍色溫。`
+  );
+}
+if (tide && tide.waveHeight !== null) {
+  advice.push(
+    tide.waveHeight >= 1.5
+      ? `目前浪高約 ${tide.waveHeight.toFixed(1)} 公尺，屬偏大的浪況，請與浪區保持距離並避免進入下層階梯。`
+      : `目前浪高約 ${tide.waveHeight.toFixed(1)} 公尺，浪況相對平穩，仍請留意突發長浪。`
+  );
+}
+
+// 潮汐小辭典（科普）
+const glossary = [
+  { term: '滿潮（高潮）', desc: '海水位升到當日相對最高的時刻。滿潮前後海水最貼近魚鱗天梯階梯。' },
+  { term: '乾潮（低潮）', desc: '海水位降到當日相對最低的時刻，消波塊與潮間帶會露出。' },
+  { term: '潮差', desc: '當日最高潮位與最低潮位的差距，潮差越大，海面升降越明顯。' },
+  { term: '大潮', desc: '潮差偏大的時期，多出現在朔（新月）或望（滿月）前後，因日、月引潮力方向相近而疊加。' },
+  { term: '小潮', desc: '潮差偏小的時期，多出現在上弦月與下弦月前後，日、月引潮力方向互相抵消。' },
+  { term: '平均海平面', desc: '長期觀測的海面平均高度，本站潮位以此為 0 公尺基準，因此數值可能出現負值。' },
+];
+
+const metric = (label: string, value: string, hint?: string) => ({ label, value, hint });
+
+const metrics = tide
+  ? [
+      metric('潮位', level === null ? '—' : `${level.toFixed(2)} m`, '相對平均海平面'),
+      metric('潮勢', tide.current.trendLabel, tide.current.ratePerHour === null ? undefined : `${tide.current.ratePerHour > 0 ? '+' : ''}${tide.current.ratePerHour.toFixed(2)} m／小時`),
+      metric('浪高', tide.waveHeight === null ? '—' : `${tide.waveHeight.toFixed(1)} m`),
+      metric('海面水溫', tide.seaTemp === null ? '—' : `${tide.seaTemp.toFixed(1)}°C`),
+      ...(isHome ? [] : [metric('月相', tide.today ? `${tide.today.moon.emoji} ${tide.today.moon.name}` : '—', tide.today ? `受照 ${Math.round(tide.today.moon.illumination * 100)}%` : undefined)]),
+      ...(isHome ? [] : [metric('今日潮差', today ? `${today.rangeM.toFixed(2)} m` : '—', today ? (today.spring ? '大潮' : '小潮') : undefined)]),
+    ]
+  : [];
+---
+
+<section aria-labelledby="tide-heading" class="rounded-2xl border border-scale bg-white p-6 shadow-sm">
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wide text-coast">🌊 南寮海岸潮汐</p>
+      <h2 id="tide-heading" class="mt-0.5 text-xl">
+        {isHome ? '現在潮位與下一次滿潮、乾潮' : '南寮魚鱗天梯即時潮汐與未來一週潮位'}
+      </h2>
+    </div>
+    {updatedLabel && <span class="shrink-0 text-xs text-ink/50">更新於 {updatedLabel}</span>}
+  </div>
+
+  {
+    !tide && (
+      <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <p>即時潮汐暫時無法取得，請稍後重新整理，或參考下方官方資訊。</p>
+        <p class="mt-2">
+          <a
+            href="https://www.cwa.gov.tw/V8/C/T/Marine.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline"
+          >
+            中央氣象署潮汐預報
+          </a>
+          ｜
+          <a href="/tide/" class="underline">潮汐說明</a>
+        </p>
+      </div>
+    )
+  }
+
+  {
+    tide && (
+      <>
+        {/* 潮位儀表 */}
+        <div class="mt-4 rounded-xl bg-scale/60 p-4">
+          <div class="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <span class="text-3xl font-bold text-deepsea">
+                {level === null ? '—' : `${level.toFixed(2)} m`}
+              </span>
+              <span class="ml-2 align-middle text-sm font-semibold text-sunset">
+                {trendIcon[tide.current.trend]} {tide.current.trendLabel}
+              </span>
+            </div>
+            <span class="text-xs text-ink/55">潮位基準：平均海平面</span>
+          </div>
+
+          {levelPct !== null && today && (
+            <div class="mt-3">
+              <div class="relative h-2.5 rounded-full bg-gradient-to-r from-sand via-coast to-deepsea">
+                <span
+                  class="absolute -top-1 h-4 w-1.5 -translate-x-1/2 rounded-full bg-ink ring-2 ring-white"
+                  style={`left:${levelPct.toFixed(1)}%`}
+                  aria-hidden="true"
+                />
+              </div>
+              <div class="mt-1.5 flex justify-between text-[11px] text-ink/60">
+                <span>今日最低 {today.lowMin.toFixed(2)} m</span>
+                <span>今日最高 {today.highMax.toFixed(2)} m</span>
+              </div>
+            </div>
+          )}
+
+          <dl class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {metrics.map((m) => (
+              <div class="rounded-lg bg-white px-3 py-2.5">
+                <dt class="text-xs text-ink/60">{m.label}</dt>
+                <dd class="mt-0.5 text-base font-semibold text-deepsea">{m.value}</dd>
+                {m.hint && <div class="text-[11px] text-ink/50">{m.hint}</div>}
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        {/* 下一次滿潮／乾潮 */}
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          <div class="rounded-xl border border-coast/30 bg-coast/10 p-4">
+            <div class="text-xs font-semibold text-coast">下一次滿潮</div>
+            <div class="mt-1 text-2xl font-bold text-deepsea">{nextHigh ? nextHigh.time : '—'}</div>
+            <div class="mt-0.5 text-sm text-ink/70">
+              {nextHigh ? `${nextHigh.heightM.toFixed(2)} m・${formatCountdown(toMin(nextHigh))}` : '今日無資料'}
+            </div>
+            {nextHigh && nextHigh.date !== todayDate && (
+              <div class="mt-1 text-[11px] text-ink/50">{formatMonthDay(nextHigh.date)}</div>
+            )}
+          </div>
+
+          <div class="rounded-xl border border-sunset/30 bg-sunset/10 p-4">
+            <div class="text-xs font-semibold text-sunset">下一次乾潮</div>
+            <div class="mt-1 text-2xl font-bold text-deepsea">{nextLow ? nextLow.time : '—'}</div>
+            <div class="mt-0.5 text-sm text-ink/70">
+              {nextLow ? `${nextLow.heightM.toFixed(2)} m・${formatCountdown(toMin(nextLow))}` : '今日無資料'}
+            </div>
+          </div>
+        </div>
+
+        {/* 24 小時潮位曲線 */}
+        {points.length > 1 && (
+          <div class="mt-6">
+            <div class="flex items-end justify-between gap-3">
+              <h3 class="text-base font-semibold text-deepsea">未來 24 小時潮位曲線</h3>
+              <span class="text-xs text-ink/50">單位：公尺（相對平均海平面）</span>
+            </div>
+
+            <div class="mt-3 -mx-1 overflow-x-auto">
+              <svg
+                viewBox={`0 0 ${W} ${H}`}
+                class="h-auto w-full min-w-[560px]"
+                role="img"
+                aria-label={`未來 24 小時潮位曲線，目前潮位 ${level === null ? '未知' : `${level.toFixed(2)} 公尺`}，${tide.current.trendLabel}`}
+              >
+                <defs>
+                  <linearGradient id="tideFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#6C9AAA" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#6C9AAA" stop-opacity="0.03" />
+                  </linearGradient>
+                </defs>
+
+                {/* 網格 */}
+                {[0, 0.25, 0.5, 0.75, 1].map((g) => {
+                  const y = PT + innerH * g;
+                  return <line x1={PL} y1={y} x2={W - PR} y2={y} stroke="#F1F0EB" stroke-width="1" />;
+                })}
+
+                {/* 平均海平面（0 公尺） */}
+                <line
+                  x1={PL}
+                  y1={zeroY}
+                  x2={W - PR}
+                  y2={zeroY}
+                  stroke="#E99A59"
+                  stroke-width="1"
+                  stroke-dasharray="4 4"
+                  opacity="0.65"
+                />
+                <text x={PL - 6} y={zeroY + 4} text-anchor="end" font-size="9" fill="#E99A59">
+                  0
+                </text>
+                <text x={PL - 6} y={PT + 9} text-anchor="end" font-size="9" fill="#243137" opacity="0.6">
+                  {yMax.toFixed(1)}
+                </text>
+                <text x={PL - 6} y={PT + innerH} text-anchor="end" font-size="9" fill="#243137" opacity="0.6">
+                  {yMin.toFixed(1)}
+                </text>
+
+                {/* 潮位面積與曲線 */}
+                <path d={areaPath} fill="url(#tideFill)" />
+                <path d={linePath} fill="none" stroke="#163B4D" stroke-width="2" stroke-linejoin="round" />
+
+                {/* 目前時刻 */}
+                <line
+                  x1={xNow}
+                  y1={PT}
+                  x2={xNow}
+                  y2={PT + innerH}
+                  stroke="#243137"
+                  stroke-width="1"
+                  stroke-dasharray="3 3"
+                  opacity="0.5"
+                />
+                {level !== null && (
+                  <circle cx={xNow} cy={yAt(level)} r="4" fill="#163B4D" stroke="#fff" stroke-width="1.5" />
+                )}
+                <text x={xNow + 5} y={PT + innerH - 4} font-size="9" fill="#243137" opacity="0.7">
+                  現在
+                </text>
+
+                {/* 滿潮／乾潮標記 */}
+                {markers.map((m) => (
+                  <>
+                    <line
+                      x1={m.x}
+                      y1={PT}
+                      x2={m.x}
+                      y2={PT + innerH}
+                      stroke={m.type === 'high' ? '#6C9AAA' : '#E99A59'}
+                      stroke-width="1"
+                      opacity="0.45"
+                    />
+                    <circle
+                      cx={m.x}
+                      cy={m.y}
+                      r="3"
+                      fill={m.type === 'high' ? '#6C9AAA' : '#E99A59'}
+                      stroke="#fff"
+                      stroke-width="1"
+                    />
+                    <text
+                      x={m.x}
+                      y={m.labelY}
+                      text-anchor="middle"
+                      font-size="9.5"
+                      font-weight="600"
+                      fill={m.type === 'high' ? '#163B4D' : '#8a5a2b'}
+                    >
+                      {m.type === 'high' ? '滿' : '乾'} {m.time}
+                    </text>
+                  </>
+                ))}
+
+                {/* 時間刻度 */}
+                {hourTicks.map((t) => (
+                  <text x={t.x} y={H - 12} text-anchor="middle" font-size="9.5" fill="#243137" opacity="0.65">
+                    {t.label}
+                  </text>
+                ))}
+              </svg>
+            </div>
+          </div>
+        )}
+
+        {/* 今日潮汐時間軸 */}
+        {today && today.events.length > 0 && (
+          <div class="mt-6">
+            <h3 class="text-base font-semibold text-deepsea">
+              今日潮汐（{formatMonthDay(today.date)}）
+            </h3>
+            <ul class="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+              {today.events.map((e) => (
+                <li
+                  class:list={[
+                    'rounded-xl border p-3.5',
+                    e.type === 'high' ? 'border-coast/30 bg-coast/10' : 'border-sunset/30 bg-sunset/10',
+                  ]}
+                >
+                  <div class="flex items-center justify-between">
+                    <span
+                      class:list={[
+                        'rounded px-2 py-0.5 text-xs font-semibold',
+                        e.type === 'high' ? 'bg-coast/25 text-deepsea' : 'bg-sunset/25 text-ink',
+                      ]}
+                    >
+                      {e.type === 'high' ? '滿潮' : '乾潮'}
+                    </span>
+                    <span class="text-xs text-ink/55">{e.at > nowMs ? '待發生' : '已發生'}</span>
+                  </div>
+                  <div class="mt-1.5 text-xl font-bold text-deepsea">{e.time}</div>
+                  <div class="text-sm text-ink/70">{e.heightM.toFixed(2)} m</div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {isHome ? (
+          <a
+            href="/tide/"
+            class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-deepsea hover:text-sunset"
+          >
+            查看完整潮汐曲線與一週潮汐表 →
+          </a>
+        ) : (
+          <>
+            {/* 一週潮汐表 */}
+            <div class="mt-6">
+              <h3 class="text-base font-semibold text-deepsea">未來一週潮汐表</h3>
+              <p class="mt-1 text-xs text-ink/60">
+                潮差越大代表海面升降越明顯；「大潮」「小潮」為相對本期潮差的比較結果。
+              </p>
+              <div class="mt-3">
+                <TideTable list={tide.days} days={7} />
+              </div>
+            </div>
+
+            {/* 觀賞建議 */}
+            <div class="mt-6 rounded-xl border border-scale bg-scale/40 p-4">
+              <h3 class="text-base font-semibold text-deepsea">依今日潮汐的觀賞建議</h3>
+              <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-ink/80">
+                {advice.map((a) => (
+                  <li class="flex gap-2">
+                    <span class="shrink-0 text-coast" aria-hidden="true">•</span>
+                    <span>{a}</span>
+                  </li>
+                ))}
+              </ul>
+              <p class="mt-3 text-xs text-ink/60">
+                搭配<a href="/sunset/" class="underline">日落時間</a>與<a href="/weather/" class="underline">天氣與海象</a>一起判斷，
+                可先看<a href="/today/" class="underline">今日狀況</a>的整體建議。安全須知詳見
+                <a href="/responsibility/" class="underline">科普與訪客責任</a>。
+              </p>
+            </div>
+
+            {/* 潮汐小辭典 */}
+            <div class="mt-6">
+              <h3 class="text-base font-semibold text-deepsea">潮汐小辭典</h3>
+              <dl class="mt-3 grid gap-3 sm:grid-cols-2">
+                {glossary.map((g) => (
+                  <div class="rounded-xl border border-scale bg-white p-3.5">
+                    <dt class="text-sm font-semibold text-deepsea">{g.term}</dt>
+                    <dd class="mt-1 text-sm leading-relaxed text-ink/75">{g.desc}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </>
+        )}
+
+        <p class="mt-4 text-xs leading-relaxed text-ink/55">
+          潮位與潮時由海洋數值模式推算，並以平均海平面為 0 公尺基準，與港區實測值可能有數分鐘至十餘分鐘差異；
+          颱風、低壓與強勁季風期間的實際水位也會與預報不同。請以
+          <a href="https://www.cwa.gov.tw/V8/C/T/Marine.html" target="_blank" rel="noopener noreferrer" class="underline">
+            中央氣象署潮汐預報
+          </a>
+          及現場警示為準，海象不佳時請勿進入下層階梯。
+        </p>
+      </>
+    )
+  }
+</section>

@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../data/site.js';
+---
+
+<BaseLayout
+  title="目前離線"
+  description="目前無法連線網路。已快取的頁面仍可瀏覽，恢復連線後即可查看南寮魚鱗天梯的即時天氣、潮汐與最新資訊。"
+  noindex={true}
+>
+  <div class="mx-auto max-w-2xl px-4 py-20 text-center">
+    <p class="text-sm font-semibold uppercase tracking-widest text-coast">Offline</p>
+    <h1 class="mt-3 text-3xl font-bold sm:text-4xl">目前沒有網路連線</h1>
+    <p class="mt-4 leading-relaxed text-ink/75">
+      你現在處於離線狀態。已快取的頁面仍可瀏覽；恢復連線後，即可查看{SITE.fullName}的即時天氣、風速、潮汐與日落時間。
+    </p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a href="/" class="rounded-full bg-deepsea px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ink">回到首頁</a>
+      <a href="/today/" class="rounded-full border border-deepsea px-5 py-2.5 text-sm font-semibold text-deepsea hover:bg-scale">今日狀況</a>
+      <a href="/tide/" class="rounded-full border border-deepsea px-5 py-2.5 text-sm font-semibold text-deepsea hover:bg-scale">即時潮汐</a>
+    </div>
+    <p class="mt-8 text-xs text-ink/55">
+      即時資料需要網路連線，離線時顯示的內容可能不是最新版本。
+    </p>
+  </div>
+</BaseLayout>

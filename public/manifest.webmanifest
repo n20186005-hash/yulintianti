@@ -6,14 +6,40 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "orientation": "portrait",
   "background_color": "#163B4D",
   "theme_color": "#163B4D",
   "lang": "zh-Hant-TW",
+  "dir": "ltr",
   "categories": ["travel", "lifestyle"],
+  "prefer_related_applications": false,
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "今日狀況",
+      "short_name": "今日狀況",
+      "description": "查看南寮魚鱗天梯今天是否適合前往",
+      "url": "/today/",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "潮汐表",
+      "short_name": "潮汐",
+      "description": "今日漲潮與退潮時間",
+      "url": "/tide/",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "停車與導航",
+      "short_name": "停車",
+      "description": "南寮漁港停車場與步行路線",
+      "url": "/parking/",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
   ]
 }

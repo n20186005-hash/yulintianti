@@ -1,0 +1,5 @@
+# pnpm 設定（pnpm 10 起，onlyBuiltDependencies 需放在此處）
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - workerd

@@ -29,7 +29,8 @@ export function website() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: SITE.fullName,
+    name: SITE.siteTitle,
+    alternateName: [SITE.name, SITE.shortName],
     url: SITE.url,
     inLanguage: SITE.lang,
   };
@@ -44,6 +45,11 @@ export function touristAttraction(opts: {
   address?: string;
   url: string;
   alternateName?: string[];
+  /**
+   * 評分資料。僅在評分確實屬於「這個實體」時才帶入，且頁面必須同時標註來源，
+   * 否則等於把第三方的評價宣稱成自己的資料。
+   */
+  aggregateRating?: { value: number; count: number };
 }) {
   return {
     '@context': 'https://schema.org',
@@ -63,6 +69,15 @@ export function touristAttraction(opts: {
       latitude: opts.lat,
       longitude: opts.lng,
     },
+    aggregateRating: opts.aggregateRating
+      ? {
+          '@type': 'AggregateRating',
+          ratingValue: opts.aggregateRating.value,
+          reviewCount: opts.aggregateRating.count,
+          bestRating: 5,
+          worstRating: 1,
+        }
+      : undefined,
     hasMap: SITE.mapsUrl,
     address: opts.address
       ? {

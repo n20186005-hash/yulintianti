@@ -1,0 +1,74 @@
+---
+import { SITE } from '../data/site.js';
+
+interface Props {
+  title?: string;
+  compact?: boolean;
+}
+
+const { title = 'Google 地圖評價', compact = false } = Astro.props;
+const r = SITE.googleRating;
+
+// 5 分制星等：以四捨五入的整數呈現實心星數，其餘為空心
+const filledStars = Math.round(r.value);
+const starList = [1, 2, 3, 4, 5];
+---
+
+<section
+  aria-label={`${title}：${r.value} 分，滿分 5 分，共 ${r.count.toLocaleString('en-US')} 則評價`}
+  class:list={[
+    'rounded-2xl border border-scale bg-white',
+    compact ? 'p-4' : 'p-5 sm:p-6',
+  ]}
+>
+  <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+    <div class="flex items-center gap-3">
+      <span class:list={['font-bold leading-none text-deepsea', compact ? 'text-3xl' : 'text-4xl']}>
+        {r.value.toFixed(1)}
+      </span>
+      <div>
+        <div class="flex items-center gap-1" aria-hidden="true">
+          {
+            starList.map((n) => (
+              <svg viewBox="0 0 20 20" class="h-4 w-4">
+                <path
+                  d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z"
+                  fill={n <= filledStars ? '#E99A59' : '#D8D5CC'}
+                />
+              </svg>
+            ))
+          }
+        </div>
+        <p class="text-sm font-semibold text-deepsea">
+          {r.count.toLocaleString('en-US')} 則評價
+        </p>
+      </div>
+    </div>
+
+    <div class="text-xs leading-relaxed text-ink/60">
+      <p>
+        評分與評價數來自
+        <a
+          href={r.sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-semibold text-deepsea underline hover:text-sunset"
+        >
+          {r.sourceLabel}
+        </a>
+        （{r.placeName}）。
+      </p>
+      <p class="mt-0.5">
+        類別：{r.category}｜資料查詢日：{r.checkedAt}｜評分可能隨時變動，請以
+        <a
+          href={r.sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline hover:text-sunset"
+        >
+          Google 地圖頁面
+        </a>最新顯示為準。
+      </p>
+    </div>
+  </div>
+</section>

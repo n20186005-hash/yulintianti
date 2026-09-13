@@ -1,0 +1,217 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import SourceBlock from '../../components/SourceBlock.astro';
+import { breadcrumb, faqPage } from '../../lib/schema';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '科普與訪客責任', href: '/responsibility/' },
+];
+
+const faqs = [
+  {
+    q: '消波塊到底有沒有用？',
+    a: '消波塊能削減波浪能量、降低越波與護岸受損，是常見的海岸防護工法；但它同時會改變漂沙與沿岸流，可能造成鄰近海岸的侵蝕或淤積，也大幅改變景觀與親水條件。因此實務上會搭配離岸堤、養灘、植被復育等方式綜合評估，而非單靠一種工法。',
+  },
+  {
+    q: '什麼是瘋狗浪？遇到時怎麼辦？',
+    a: '瘋狗浪是指突發的異常大浪，常由遠處颱風或低壓產生的長浪在岸邊疊加而成，即使當天天氣晴朗也可能發生。看到海面出現連續浪湧、水位異常升降或聽到異常聲響時，請立刻離開浪區、往高處與內陸移動，不要為了拍照或拾物靠近。',
+  },
+  {
+    q: '可以在這裡玩水或游泳嗎？',
+    a: '魚鱗天梯與消波塊周邊並非安全的水域活動場所，此處有陡降地形、暗流與消波塊縫隙。請勿在此游泳或跳水；沙灘戲水也應在現場允許範圍內並全程有成人看顧，並留意漲潮時間。',
+  },
+  {
+    q: '可以撿貝殼、石頭或抓螃蟹嗎？',
+    a: '不建議。貝殼、砂石與潮間帶生物都是海岸生態與地形的一部分，撿拾會造成棲地流失。台灣多數國家風景區與保護區也明文禁止採捕與破壞。請以觀察、拍照取代帶走。',
+  },
+  {
+    q: '緊急狀況要打哪支電話？',
+    a: '海上或岸際事故請撥 118（海巡報案專線），有人受傷或溺水請撥 119（消防與救護），手機無訊號時可撥 112。報案時請說明確切位置或鄰近地標，方便救援人員定位。',
+  },
+];
+
+const engineering = [
+  {
+    title: '護岸與消波塊',
+    body: '護岸用於阻擋波浪直接沖刷陸地；消波塊則以交錯堆疊的方式讓波浪在塊體間破碎、消耗能量，降低越波與反射。兩者常搭配使用。',
+  },
+  {
+    title: '離岸堤與養灘',
+    body: '離岸堤設在稍遠處，使波浪提前破碎、在堤後形成較平靜的水域並促成砂的堆積；養灘則是以人工方式補充砂源，讓沙灘自然消能，兼顧景觀與親水。',
+  },
+  {
+    title: '為什麼需要它們',
+    body: '新竹沿海冬季受強勁東北季風與長浪影響，加上河川輸沙與沿岸流的變化，海岸線長期處於侵蝕與淤積交替的動態。防護設施的目的，是降低災害風險並維持港區與陸地安全。',
+  },
+  {
+    title: '工法的限制',
+    body: '硬式結構可能改變漂沙路徑、使下游海岸失去砂源而加劇侵蝕，也可能造成反射波增強與景觀衝擊。因此完整的海岸管理會同時考量軟、硬工法與長期監測。',
+  },
+];
+
+const safety = [
+  {
+    emoji: '🌊',
+    title: '瘋狗浪與長浪',
+    body: '颱風或低壓即使在遠方，也可能在岸邊造成長浪。浪與浪之間看似平靜，卻容易讓人誤判安全距離。請與浪區保持充足距離，並注意潮位變化。',
+  },
+  {
+    emoji: '↩️',
+    title: '離岸流',
+    body: '沙灘與濱海可能出現由岸邊往外海流動的離岸流，速度常超過一般人的游泳速度。若被帶離岸邊，請保持冷靜、不要逆流硬游，沿著海岸平行方向游出水流區後再返回岸邊。',
+  },
+  {
+    emoji: '⏳',
+    title: '漲潮與回程時間',
+    body: '在沙灘或潮間帶活動時，漲潮速度常比預期快。出發前先確認潮汐時間，並為回程預留時間，避免被潮水隔絕。',
+  },
+  {
+    emoji: '🥾',
+    title: '溼滑與縫隙',
+    body: '消波塊與階梯表面在潮濕或長苔後非常滑，塊體之間也有空洞與縫隙。行走時請穿著防滑鞋，不要跳躍或踩踏不穩定的石塊。',
+  },
+  {
+    emoji: '🆘',
+    title: '落水自救優先順序',
+    body: '保持冷靜、以水母漂或仰漂維持體力並大聲呼救；不要慌張揮手消耗體力。岸上的人請優先投擲救生圈、浮具或繩索，非受過訓練者不宜貿然下水救人。',
+  },
+  {
+    emoji: '🌙',
+    title: '夜間與獨行',
+    body: '海岸夜間照明不足，難以判斷浪區與地形。不建議夜間進入下層階梯與消波塊，也避免單獨前往。',
+  },
+];
+
+const conservation = [
+  { label: '不帶走', detail: '不撿拾貝殼、砂石與生物，讓海岸維持原有的地形與生態組成。' },
+  { label: '不捕捉、不餵食', detail: '不打擾、不追逐、不餵食野生動物，繁殖期請特別保持距離。' },
+  { label: '不踩踏潮間帶', detail: '潮間帶生物脆弱，請走在既有路徑上，避免踩踏泥灘與生物洞穴。' },
+  { label: '垃圾帶走', detail: '自備垃圾袋，將垃圾（含菸蒂、塑膠袋、釣線）帶離海岸並妥善分類。' },
+  { label: '不撿釣具與漁網', detail: '廢棄漁網與釣線易纏繞海洋生物，可通報主管機關處理，不要隨意丟棄。' },
+  { label: '減少一次性用品', detail: '自備水壺、餐具與購物袋，是降低海洋廢棄物最直接的方式。' },
+];
+
+const etiquette = [
+  { label: '不要阻擋動線', detail: '熱門拍照點請排隊並禮讓，不要長時間佔用階梯或通道，影響他人通行與安全。' },
+  { label: '夜間拍攝尊重居民', detail: '避免強光直射周邊住家與其他遊客；使用腳架時留意他人動線。' },
+  { label: '空拍注意事項', detail: '留意民航與地方禁限航規定，避開人群上方，不干擾生態與候鳥，並尊重他人隱私。' },
+  { label: '寵物同行', detail: '全程繫繩並清理排遺，避免讓寵物追逐鳥類或進入禁制區域。' },
+  { label: '音量與環境', detail: '海邊開闊容易傳聲，請降低音量，共同維持觀賞品質。' },
+  { label: '尊重在地生活', detail: '港區是工作場所，請留意作業車輛與漁具，不任意移動或攀坐漁業設施。' },
+];
+---
+
+<BaseLayout
+  title="南寮魚鱗天梯科普與訪客責任｜海岸工程、安全須知與保育守則"
+  description="南寮魚鱗天梯科普專頁：消波塊與護岸原理、為什麼需要海岸防護、瘋狗浪與離岸流等海岸安全觀念、落水自救、生態保育與垃圾帶走等訪客責任。"
+  jsonLd={[breadcrumb(crumbs), faqPage(faqs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">科普與訪客責任</h1>
+    <p class="mt-3 leading-relaxed text-ink/80">
+      魚鱗天梯不是單純的景觀造物，而是一道<strong>海岸防護結構</strong>。理解它的原理與限制，能讓你更知道該如何安全地親近海岸；理解海岸生態，則能讓下一位訪客也看到同樣的風景。
+    </p>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">海岸工程為什麼長這樣</h2>
+      <div class="mt-5 grid gap-4 sm:grid-cols-2">
+        {
+          engineering.map((e) => (
+            <article class="rounded-2xl border border-scale bg-white p-5">
+              <h3 class="text-base font-semibold text-deepsea">{e.title}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-ink/80">{e.body}</p>
+            </article>
+          ))
+        }
+      </div>
+      <p class="mt-4 rounded-xl border border-scale bg-scale/40 p-4 text-sm leading-relaxed text-ink/75">
+        不同海岸的條件差異很大，工法選擇需經專業評估。本站僅就原理做科普說明，不取代工程與管理機關的專業判斷；實際設施構造與範圍請以主管機關公告為準。
+      </p>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">海岸安全須知</h2>
+      <div class="mt-5 space-y-3.5">
+        {
+          safety.map((s) => (
+            <article class="flex gap-3 rounded-2xl border border-scale bg-white p-4">
+              <span class="text-xl leading-none" aria-hidden="true">{s.emoji}</span>
+              <div>
+                <h3 class="text-base font-semibold text-deepsea">{s.title}</h3>
+                <p class="mt-1 text-sm leading-relaxed text-ink/80">{s.body}</p>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">生態保育守則</h2>
+      <dl class="mt-5 grid gap-3 sm:grid-cols-2">
+        {
+          conservation.map((c) => (
+            <div class="rounded-xl border border-scale bg-white p-4">
+              <dt class="text-sm font-semibold text-deepsea">✅ {c.label}</dt>
+              <dd class="mt-1 text-sm leading-relaxed text-ink/75">{c.detail}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">攝影禮儀與共同空間</h2>
+      <dl class="mt-5 space-y-3">
+        {
+          etiquette.map((e) => (
+            <div class="rounded-xl border border-scale bg-white p-4">
+              <dt class="text-sm font-semibold text-deepsea">{e.label}</dt>
+              <dd class="mt-1 text-sm leading-relaxed text-ink/75">{e.detail}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section class="mt-10 rounded-2xl border border-rose-200 bg-rose-50 p-5 sm:p-6">
+      <h2 class="text-xl text-rose-900">緊急聯絡</h2>
+      <ul class="mt-3 space-y-2 text-sm text-rose-900/90">
+        <li><strong>118</strong>｜海巡報案專線（海上、岸際事故與落水）</li>
+        <li><strong>119</strong>｜消防與救護（受傷、溺水、火警）</li>
+        <li><strong>110</strong>｜警察（治安與交通事故）</li>
+        <li><strong>112</strong>｜行動電話緊急報案（無訊號時可嘗試）</li>
+      </ul>
+      <p class="mt-3 text-xs text-rose-900/80">
+        報案時請說明確切位置或鄰近地標（例如「南寮魚鱗天梯」或 Plus Code），可大幅提升救援效率。
+      </p>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">常見問題</h2>
+      <div class="mt-4 space-y-5">
+        {
+          faqs.map((f) => (
+            <div>
+              <h3 class="text-base font-semibold text-deepsea">{f.q}</h3>
+              <p class="mt-1.5 leading-relaxed text-ink/80">{f.a}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <SourceBlock
+      sources={[
+        { label: '交通部中央氣象署（長浪與海象警示）', href: 'https://www.cwa.gov.tw/' },
+        { label: '海洋委員會海巡署（海域安全宣導）', href: 'https://www.cga.gov.tw/' },
+        { label: '海洋保育署（海洋保育與白海豚保育）', href: 'https://www.oca.gov.tw/' },
+        { label: '農業部林業及自然保育署', href: 'https://www.forest.gov.tw/' },
+        { label: '內政部國家公園署（海岸保育觀念）', href: 'https://www.nps.gov.tw/' },
+      ]}
+    />
+  </div>
+</BaseLayout>

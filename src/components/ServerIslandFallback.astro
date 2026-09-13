@@ -1,0 +1,20 @@
+---
+/**
+ * 伺服器島嶼載入中的替代畫面（fallback slot 用）。
+ * 保持與實際模組相近的高度與版面，避免內容載入時造成版面跳動。
+ */
+interface Props {
+  label?: string;
+  rows?: number;
+}
+const { label = '正在載入', rows = 3 } = Astro.props;
+---
+
+<div class="rounded-2xl border border-scale bg-white p-6 shadow-sm" aria-hidden="true">
+  <div class="h-5 w-44 rounded bg-scale"></div>
+  <div class="mt-4 h-20 animate-pulse rounded-xl bg-scale"></div>
+  <div class="mt-3 grid grid-cols-3 gap-3">
+    {Array.from({ length: rows }).map(() => <div class="h-16 animate-pulse rounded-lg bg-scale"></div>)}
+  </div>
+  <p class="mt-4 text-xs text-ink/40">{label}…</p>
+</div>

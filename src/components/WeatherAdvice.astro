@@ -1,0 +1,114 @@
+---
+/**
+ * 天氣建議區塊
+ * 依 buildAdvice() 的結果渲染：風險提醒置頂，其次是一句話總結與條件標籤，
+ * 最後才是「出行穿搭／遊玩安排／隨身物品」三個區塊。
+ * 沒有內容的區塊不會出現，避免把整份規則庫堆在頁面上。
+ */
+import type { WeatherAdvice, AdviceTone } from '../lib/weather-advice';
+
+interface Props {
+  advice: WeatherAdvice;
+  /** 首頁精簡模式：每區塊只顯示最重要的 2 條 */
+  compact?: boolean;
+}
+
+const { advice, compact = false } = Astro.props;
+const limit = compact ? 2 : 4;
+
+const TONE: Record<AdviceTone, { box: string; badge: string; text: string }> = {
+  good: { box: 'border-emerald-200 bg-emerald-50', badge: 'bg-emerald-600 text-white', text: 'text-emerald-900' },
+  fair: { box: 'border-scale bg-scale/50', badge: 'bg-coast text-white', text: 'text-ink' },
+  caution: { box: 'border-amber-200 bg-amber-50', badge: 'bg-amber-500 text-white', text: 'text-amber-900' },
+  poor: { box: 'border-rose-300 bg-rose-50', badge: 'bg-rose-600 text-white', text: 'text-rose-900' },
+};
+
+const tone = TONE[advice.tone];
+const groups = advice.groups.filter((g) => g.items.length > 0);
+---
+
+<!-- 風險提醒：僅在有風險時出現，且置於最上方 -->
+{
+  advice.risks.length > 0 && (
+    <ul class="space-y-2">
+      {advice.risks.map((r) => (
+        <li
+          class:list={[
+            'flex items-start gap-2.5 rounded-xl border p-3.5',
+            r.level === 'danger' ? 'border-rose-300 bg-rose-50' : 'border-amber-300 bg-amber-50',
+          ]}
+        >
+          <span class="mt-0.5 shrink-0" aria-hidden="true">
+            {r.level === 'danger' ? '🚨' : '⚠️'}
+          </span>
+          <div>
+            <p class:list={['text-sm font-bold', r.level === 'danger' ? 'text-rose-900' : 'text-amber-900']}>
+              {r.title}
+            </p>
+            <p
+              class:list={[
+                'mt-1 text-sm leading-relaxed',
+                r.level === 'danger' ? 'text-rose-800' : 'text-amber-900/90',
+              ]}
+            >
+              {r.text}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<!-- 一句話總結與條件標籤 -->
+<div class:list={['mt-3 rounded-xl border p-4', tone.box]}>
+  <div class="flex flex-wrap items-center gap-2">
+    <span class:list={['rounded-full px-2.5 py-1 text-xs font-bold', tone.badge]}>{advice.toneLabel}</span>
+    {
+      advice.chips.map((c) => (
+        <span class="rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-medium text-ink/75">{c}</span>
+      ))
+    }
+  </div>
+  <p class:list={['mt-2.5 text-base font-semibold leading-relaxed', tone.text]}>{advice.headline}</p>
+  {
+    advice.window && (
+      <p class="mt-1.5 text-sm text-ink/75">
+        🕒 較舒適時段 <strong>{advice.window.label}</strong>（{advice.window.note}）
+      </p>
+    )
+  }
+</div>
+
+<!-- 出行穿搭／遊玩安排／隨身物品 -->
+{
+  groups.length > 0 && (
+    <div class="mt-3 grid gap-3 md:grid-cols-3">
+      {groups.map((g) => (
+        <div class="rounded-xl border border-scale bg-white p-4">
+          <h4 class="text-sm font-bold text-deepsea">
+            <span aria-hidden="true">{g.emoji}</span> {g.label}
+          </h4>
+          <ul class="mt-2.5 space-y-2 text-sm leading-relaxed text-ink/80">
+            {g.items.slice(0, limit).map((it) => (
+              <li class="flex gap-2">
+                <span class="shrink-0 text-coast" aria-hidden="true">•</span>
+                <span>
+                  {it.text}
+                  {it.href && (
+                    <>
+                      {' '}
+                      <a href={it.href} class="whitespace-nowrap font-semibold text-deepsea underline">
+                        {it.linkLabel ?? '查看'}
+                      </a>
+                    </>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  )
+}

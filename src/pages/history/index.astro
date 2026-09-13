@@ -1,0 +1,175 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import SourceBlock from '../../components/SourceBlock.astro';
+import { breadcrumb } from '../../lib/schema';
+import { SITE } from '../../data/site.js';
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '歷史與故事', href: '/history/' },
+];
+
+// 以「時期／主題」呈現，避免對個別年份做出無可靠來源的斷言
+const timeline = [
+  {
+    period: '早期',
+    title: '出海口旁的漁村聚落',
+    body: '南寮位於頭前溪出海口南側一帶，早期為沿海漁撈與農墾並存的聚落。「寮」在台灣地名中通常指簡易搭建的房舍或工作站，一般認為與早年漁民在此搭建的簡易漁寮有關，是「南寮」地名的常見說法。',
+  },
+  {
+    period: '二十世紀中葉以後',
+    title: '新竹漁港的闢建與擴充',
+    body: '新竹漁港（即南寮漁港）於二十世紀中葉之後逐步闢建，並在往後數十年間陸續擴建與改善，成為新竹地區主要的漁業基地之一，帶動周邊漁市、加冰、修船與相關產業聚集。',
+  },
+  {
+    period: '漁業轉型期',
+    title: '從生產港到休閒港',
+    body: '隨著漁業環境變遷與休閒需求增加，漁港機能逐漸由純粹的生產導向，轉為兼具觀光、休憩與活動舉辦的複合空間，港區陸續增設步道、綠地與市集等公共設施。',
+  },
+  {
+    period: '海岸環境改善',
+    title: '魚鱗天梯的出現',
+    body: '新竹沿海長期受季風與波浪侵蝕，需以護岸與消波設施維持海岸穩定。南寮海岸一帶以混凝土塊體層層堆疊成階梯狀、形似魚鱗的護岸結構，在網路上被稱為「魚鱗天梯」，並逐漸成為南寮最具辨識度的地景之一。',
+  },
+  {
+    period: '近年',
+    title: '十七公里海岸線與觀光廊帶',
+    body: '新竹市推動海岸線整體規劃，串連南寮漁港、港南運河、香山濕地等節點，形成知名的「十七公里海岸線」自行車道系統，魚鱗天梯因此成為這條廊帶上重要的停留點。',
+  },
+];
+
+const cultureCards = [
+  {
+    emoji: '🌬️',
+    title: '「風城」與九降風',
+    body: '新竹冬季受東北季風影響，加上雪山山脈與中央山脈夾峙形成的風道效應，風勢格外強勁，因此有「風城」之稱。農曆九月前後颳起的強風，地方上稱為「九降風」，長年影響新竹的常民生活，也與米粉、柿餅等需要日曬風乾的地方產業密切相關。',
+  },
+  {
+    emoji: '🪁',
+    title: '風箏與海洋活動',
+    body: '穩定而強勁的海風，讓南寮成為風箏、風帆與風浪板活動的理想場地。新竹市多年來在此舉辦風箏相關活動，港區旁設有國際風箏賽場與大片草坪，假日可見家庭放風箏、球隊練球與各式戶外活動。',
+  },
+  {
+    emoji: '📷',
+    title: '婚紗與影像文化',
+    body: '階梯狀的地景搭配台灣海峽的開闊水平線，使魚鱗天梯成為熱門的拍照與婚紗取景點。日落前後的斜射光與潮水變化，是影像工作者最常運用的元素。',
+  },
+  {
+    emoji: '🐟',
+    title: '漁村生活記憶',
+    body: '南寮的日常長期圍繞著潮水與漁汛運轉：清晨出海、午後返港、漁市叫賣、網具修補。這些生活場景今日仍可在港區周邊觀察到片段，是理解這個地方最直接的線索。',
+  },
+];
+
+const oralNotes = [
+  {
+    title: '「魚鱗」之名的聯想',
+    body: '除了形容階梯層疊的紋理之外，地方上也有人將「魚鱗」與新竹沿海冬季盛產的烏魚相互聯想。這類說法屬於在地口傳與命名想像，並非正式史料記載。',
+  },
+  {
+    title: '消波塊的多重聯想',
+    body: '消波塊在台灣民間有各式俗稱與戲稱，反映的是居民與海岸工程長期共處的生活經驗，而非工程上的正式名稱。',
+  },
+];
+---
+
+<BaseLayout
+  title="南寮魚鱗天梯歷史與故事｜從漁村、漁港到海岸地景"
+  description="南寮魚鱗天梯的歷史背景與在地故事：南寮地名由來、新竹漁港的闢建與轉型、魚鱗天梯護岸的形成、十七公里海岸線，以及風城九降風、風箏與婚紗影像文化。"
+  jsonLd={[breadcrumb(crumbs)]}
+>
+  <div class="mx-auto max-w-3xl px-4 py-10">
+    <Breadcrumbs items={crumbs} />
+    <h1 class="mt-4 text-3xl font-bold">歷史與在地故事</h1>
+    <p class="mt-3 leading-relaxed text-ink/80">
+      現在的{SITE.fullName}，是由<strong>海岸地形、漁業經濟與居民生活</strong>長時間交織而成的結果。要理解這道階梯為什麼長成這個樣子、為什麼會出現在這裡，得先回到南寮這個漁村與新竹漁港的發展脈絡。
+    </p>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">發展脈絡</h2>
+      <ol class="mt-5 space-y-4 border-l-2 border-scale pl-5">
+        {
+          timeline.map((t) => (
+            <li class="relative">
+              <span
+                class="absolute -left-[27px] top-1.5 h-3 w-3 rounded-full bg-sunset ring-4 ring-white"
+                aria-hidden="true"
+              />
+              <p class="text-xs font-semibold uppercase tracking-wide text-coast">{t.period}</p>
+              <h3 class="mt-0.5 text-lg font-semibold text-deepsea">{t.title}</h3>
+              <p class="mt-1.5 leading-relaxed text-ink/80">{t.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">風土與文化</h2>
+      <div class="mt-5 grid gap-4 sm:grid-cols-2">
+        {
+          cultureCards.map((c) => (
+            <article class="rounded-2xl border border-scale bg-white p-5">
+              <h3 class="flex items-center gap-2 text-base font-semibold text-deepsea">
+                <span aria-hidden="true">{c.emoji}</span>
+                {c.title}
+              </h3>
+              <p class="mt-2 text-sm leading-relaxed text-ink/80">{c.body}</p>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-10 rounded-2xl border border-dashed border-coast/40 bg-scale/40 p-5 sm:p-6">
+      <h2 class="text-xl">地方記憶與口傳</h2>
+      <p class="mt-2 text-sm leading-relaxed text-ink/75">
+        以下內容屬於地方上的常見說法與命名想像，<strong>並非經考證的正式史料</strong>，僅作為理解在地文化的參考。若你有更完整的地方文獻或長輩口述紀錄，歡迎透過
+        <a href="/contact/" class="underline">聯絡我們</a>補充。
+      </p>
+      <dl class="mt-4 space-y-3">
+        {
+          oralNotes.map((o) => (
+            <div class="rounded-xl bg-white p-4">
+              <dt class="text-sm font-semibold text-deepsea">{o.title}</dt>
+              <dd class="mt-1 text-sm leading-relaxed text-ink/75">{o.body}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section class="mt-10">
+      <h2 class="text-2xl">想更深入認識</h2>
+      <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+        <li class="rounded-xl border border-scale bg-white p-4">
+          <a href="/seasons/" class="font-semibold text-deepsea underline hover:text-sunset">四季遊覽策略與生態</a>
+          <p class="mt-1 text-sm text-ink/70">氣候如何形塑這裡的地景與生態節奏。</p>
+        </li>
+        <li class="rounded-xl border border-scale bg-white p-4">
+          <a href="/responsibility/" class="font-semibold text-deepsea underline hover:text-sunset">科普與訪客責任</a>
+          <p class="mt-1 text-sm text-ink/70">海岸工程原理、安全觀念與保育守則。</p>
+        </li>
+        <li class="rounded-xl border border-scale bg-white p-4">
+          <a href="/17km-coastline/" class="font-semibold text-deepsea underline hover:text-sunset">17 公里海岸線</a>
+          <p class="mt-1 text-sm text-ink/70">串連南寮到香山的自行車廊帶。</p>
+        </li>
+        <li class="rounded-xl border border-scale bg-white p-4">
+          <a href="/facilities/" class="font-semibold text-deepsea underline hover:text-sunset">訪客服務與設施</a>
+          <p class="mt-1 text-sm text-ink/70">洗手間、停車、餐飲與住宿等實用資訊。</p>
+        </li>
+      </ul>
+    </section>
+
+    <SourceBlock
+      sources={[
+        { label: '新竹市政府觀光旅遊網', href: 'https://tourism.hccg.gov.tw/' },
+        { label: '新竹市政府香山濕地生態網', href: 'https://ssw.hccg.gov.tw/' },
+        { label: '新竹市政府全球資訊網', href: 'https://www.hccg.gov.tw/' },
+        { label: '交通部觀光署', href: 'https://www.taiwan.net.tw/' },
+        { label: '中央氣象署（新竹氣候與風勢說明）', href: 'https://www.cwa.gov.tw/' },
+      ]}
+    />
+  </div>
+</BaseLayout>
