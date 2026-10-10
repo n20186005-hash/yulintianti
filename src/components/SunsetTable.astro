@@ -1,0 +1,67 @@
+---
+/**
+ * 日落時間表（伺服器島嶼，於邊緣節點即時計算）
+ * 改以 request 當下的當地日期為基準計算未來 14 天，
+ * 避免頁面隨部署時間過期（先前建置期計算會停留在舊日期）。
+ */
+import { SITE } from '../data/site.js';
+import { getSunset, getSunrise, getGoldenWindow } from '../lib/sunset';
+import { formatMonthDay } from '../lib/format';
+
+const now = new Date();
+const todayISO =
+  new Date(now.getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+
+const rows = Array.from({ length: 14 }, (_, i) => {
+  const dt = new Date(now.getTime() + i * 86400000);
+  const iso = new Date(dt.getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+  const g = getGoldenWindow(dt, SITE.geo.lat, SITE.geo.lng);
+  return {
+    iso,
+    date: formatMonthDay(iso),
+    sunrise: getSunrise(dt, SITE.geo.lat, SITE.geo.lng),
+    sunset: getSunset(dt, SITE.geo.lat, SITE.geo.lng),
+    golden: g ? `${g.start}–${g.end}` : '--',
+    isToday: iso === todayISO,
+  };
+});
+---
+
+<div class="overflow-x-auto rounded-xl border border-scale">
+  <table class="w-full min-w-[480px] border-collapse text-sm" id="sunset-table">
+    <thead>
+      <tr class="bg-deepsea text-left text-white">
+        <th class="px-4 py-3 font-semibold">日期</th>
+        <th class="px-4 py-3 font-semibold">日出</th>
+        <th class="px-4 py-3 font-semibold">日落</th>
+        <th class="px-4 py-3 font-semibold">最佳拍照窗口</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.map((r, idx) => (
+          <tr
+            data-iso={r.iso}
+            class:list={[
+              r.isToday
+                ? 'bg-sunset/15 ring-2 ring-sunset'
+                : idx % 2
+                  ? 'bg-scale/50'
+                  : 'bg-white',
+            ]}
+          >
+            <td class="whitespace-nowrap px-4 py-2.5 font-medium text-deepsea">
+              {r.date}
+              {r.isToday && (
+                <span class="ml-1 rounded bg-sunset px-1.5 text-xs text-white">今天</span>
+              )}
+            </td>
+            <td class="px-4 py-2.5">{r.sunrise}</td>
+            <td class="px-4 py-2.5 font-semibold text-sunset">{r.sunset}</td>
+            <td class="whitespace-nowrap px-4 py-2.5">{r.golden}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

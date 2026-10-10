@@ -1,34 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
-import { SITE } from '../data/site.js';
-import { getSunset, getSunrise, getGoldenWindow } from '../lib/sunset';
-import { formatMonthDay } from '../lib/format';
+import SunsetTable from '../components/SunsetTable.astro';
+import ServerIslandFallback from '../components/ServerIslandFallback.astro';
 import { breadcrumb } from '../lib/schema';
 
 const crumbs = [
   { name: '首頁', href: '/' },
   { name: '日落時間', href: '/sunset/' },
 ];
-
-// 建置期先算未來 14 天（瀏覽器端會以實際日期校正）
-const base = new Date();
-const rows = Array.from({ length: 14 }, (_, i) => {
-  const dt = new Date(base.getTime() + i * 86400000);
-  const iso = new Date(dt.getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10);
-  const g = getGoldenWindow(dt, SITE.geo.lat, SITE.geo.lng);
-  return {
-    iso,
-    date: formatMonthDay(iso),
-    sunrise: getSunrise(dt, SITE.geo.lat, SITE.geo.lng),
-    sunset: getSunset(dt, SITE.geo.lat, SITE.geo.lng),
-    golden: g ? `${g.start}–${g.end}` : '--',
-  };
-});
 ---
 
 <BaseLayout
-  title="南寮魚鱗天梯日落時間｜最佳觀賞與拍照時間"
+  title="南寮日落時間｜魚鱗天梯夕陽拍照最佳時段"
   description="南寮魚鱗天梯日落時間表，提供未來兩週的日出、日落與黃金拍照窗口，幫你安排最美的夕陽時段。"
   jsonLd={[breadcrumb(crumbs)]}
 >
@@ -36,47 +20,16 @@ const rows = Array.from({ length: 14 }, (_, i) => {
     <Breadcrumbs items={crumbs} />
     <h1 class="mt-4 text-3xl font-bold">南寮魚鱗天梯日落時間</h1>
     <p class="mt-3 text-ink/75">
-      最佳觀賞窗口約在日落前 60 至 90 分鐘到日落後 20 分鐘之間，天空色溫最好看。以下為新竹海岸位置的天文計算。
+      最佳觀賞窗口約在日落前 60 至 90 分鐘到日落後 20 分鐘之間，天空色溫最好看。以下為新竹海岸位置依當地日期即時計算的天文資料，並自動標示今天。
     </p>
 
-    <div class="mt-6 overflow-x-auto rounded-xl border border-scale">
-      <table class="w-full min-w-[480px] border-collapse text-sm" id="sunset-table">
-        <thead>
-          <tr class="bg-deepsea text-left text-white">
-            <th class="px-4 py-3 font-semibold">日期</th>
-            <th class="px-4 py-3 font-semibold">日出</th>
-            <th class="px-4 py-3 font-semibold">日落</th>
-            <th class="px-4 py-3 font-semibold">最佳拍照窗口</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            rows.map((r, i) => (
-              <tr data-iso={r.iso} class:list={[i % 2 ? 'bg-scale/50' : 'bg-white']}>
-                <td class="whitespace-nowrap px-4 py-2.5 font-medium text-deepsea">{r.date}</td>
-                <td class="px-4 py-2.5">{r.sunrise}</td>
-                <td class="px-4 py-2.5 font-semibold text-sunset">{r.sunset}</td>
-                <td class="whitespace-nowrap px-4 py-2.5">{r.golden}</td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
+    <div class="mt-6">
+      <SunsetTable server:defer>
+        <ServerIslandFallback slot="fallback" label="正在計算日落時間" rows={4} />
+      </SunsetTable>
     </div>
     <p class="mt-3 text-xs text-ink/55">
       日出日落為天文計算（Asia/Taipei），實際受地形與天氣影響。夕陽可見度請對照<a href="/weather/" class="underline">天氣與海象</a>。
     </p>
   </div>
-
-  <script>
-    // 於瀏覽器端把「今天」那一列highlight
-    const today = new Date();
-    const iso = new Date(today.getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10);
-    const row = document.querySelector(`tr[data-iso="${iso}"]`);
-    if (row) {
-      row.classList.add('ring-2', 'ring-sunset');
-      const cell = row.querySelector('td');
-      if (cell) cell.insertAdjacentHTML('beforeend', ' <span class="ml-1 rounded bg-sunset px-1.5 text-xs text-white">今天</span>');
-    }
-  </script>
 </BaseLayout>

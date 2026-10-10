@@ -47,7 +47,7 @@ export const SITE = {
   // Google 地圖評價；官方全稱與類別亦取自該 Google 地圖地點頁
   googleRating: {
     value: 4.2,
-    count: 5996,
+    count: 6019,
     // 是否輸出為 JSON-LD 的 aggregateRating（僅用於「南寮魚鱗天梯」實體頁面）
     // 取捨：評分來自 Google 地圖（第三方），Google 對複製第三方評分的複合摘要態度保守，
     // 可能不予採用；因此頁面上必須同時清楚標註來源（見 GoogleRating.astro），
@@ -58,7 +58,7 @@ export const SITE = {
     sourceUrl: 'https://maps.app.goo.gl/PAGBgo7yN5czhQnJA',
     placeName: 'Nanliao Stairway（南寮魚鱗天梯）',
     category: 'Tourist attraction',
-    checkedAt: '2026-09-13',
+    checkedAt: '2026-10-10',
   },
   // 完整郵寄地址（JSON-LD 與頁面顯示共用）
   address: {
