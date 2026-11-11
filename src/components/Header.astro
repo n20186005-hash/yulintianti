@@ -1,9 +1,12 @@
 ---
 import { SITE, NAV, NAV_DEST_URL } from '../data/site.js';
+import { placeForGuide } from '../data/guide-places';
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
   href === '/' ? path === '/' : path.startsWith(href);
-const navUrl = NAV_DEST_URL;
+const guideSlug = path.match(/^\/guides\/([^/]+)\/?$/)?.[1];
+const navUrl = guideSlug && guideSlug !== 'nanliao-at-night' ? placeForGuide(guideSlug).maps : NAV_DEST_URL;
+const navLabel = guideSlug && guideSlug !== 'nanliao-at-night' ? `導航：${placeForGuide(guideSlug).name}` : '立即導航';
 ---
 
 <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-scale">
@@ -38,7 +41,7 @@ const navUrl = NAV_DEST_URL;
           class="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-deepsea px-4 py-2 text-sm font-semibold text-white hover:bg-ink transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7-6.5-7-11a7 7 0 1 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
-          立即導航
+          {navLabel}
         </a>
         <button
           id="nav-toggle"

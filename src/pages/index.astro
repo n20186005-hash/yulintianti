@@ -49,6 +49,16 @@ const nearby = [
   { name: '17 公里海岸線', href: '/17km-coastline/', note: '串連港南運河與香山濕地的自行車道' },
 ];
 
+// 新增攻略的首頁入口，沿用現有 Card 外觀，首頁原有照片和 Hero 不變。
+const nearbyGuides = [
+  { href: '/guides/harbor-history-walk/', image: '/images/harbor-dock.jpg', title: '南寮漁港歷史散步', desc: '碼頭、港池與海岸護岸的在地故事。', tag: '港口文化' },
+  { href: '/guides/market-food-plan/', image: '/images/harbor-inner.jpg', title: '波光市集怎麼逛', desc: '市集建築、餐飲及海岸順遊動線。', tag: '吃喝' },
+  { href: '/guides/kite-first-time/', image: '/images/seashell-park.jpg', title: '南寮放風箏攻略', desc: '開闊草地、風向與安全觀賞位置。', tag: '親子' },
+  { href: '/guides/coast-canal/', image: '/images/canal-scene.jpg', title: '港南運河順遊', desc: '單車水岸路線、橋梁與拍照觀察重點。', tag: '騎行' },
+  { href: '/guides/coast-wetland/', image: '/images/wetland.jpg', title: '南寮到香山濕地', desc: '沿海景觀、潮間帶與指定觀景設施。', tag: '生態' },
+  { href: '/guides/two-hour-first-visit/', image: '/images/harbor-scenery.jpg', title: '第一次到南寮兩小時', desc: '港區、市集與魚鱗天梯的順路安排。', tag: '路線' },
+];
+
 const routes = [
   {
     href: '/itineraries/two-hours/',
@@ -336,6 +346,18 @@ const jsonLd = [
             />
           ))
         }
+      </div>
+    </section>
+
+    <!-- 新增專題與周邊遊覽入口 -->
+    <section class="mt-14" aria-labelledby="nearby-guides-heading">
+      <div class="flex items-end justify-between gap-3">
+        <h2 id="nearby-guides-heading" class="text-2xl">周邊遊覽與主題攻略</h2>
+        <a href="/guides/" class="text-sm font-semibold text-deepsea underline">查看全部 31 篇攻略</a>
+      </div>
+      <p class="mt-2 text-sm text-ink/70">從魚鱗天梯延伸到漁港、市集、風箏場、運河與濕地，依交通方式及興趣選擇路線。</p>
+      <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {nearbyGuides.map((guide) => <Card {...guide} alt={`${guide.title}相關的南寮沿海實景`} />)}
       </div>
     </section>
 

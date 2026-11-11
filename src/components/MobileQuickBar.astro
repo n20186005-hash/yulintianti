@@ -6,14 +6,17 @@
  * 桌機版已有頂部「立即導航」與完整主選單，故此列僅在 md 以下顯示。
  */
 import { NAV_DEST_URL } from '../data/site.js';
+import { placeForGuide } from '../data/guide-places';
 
 const path = Astro.url.pathname;
+const guideSlug = path.match(/^\/guides\/([^/]+)\/?$/)?.[1];
+const destination = guideSlug && guideSlug !== 'nanliao-at-night' ? placeForGuide(guideSlug).maps : NAV_DEST_URL;
 const isActive = (href: string) => path.startsWith(href);
 
 const actions = [
   { label: '今日天氣', href: '/weather/', icon: '🌤️', external: false },
   { label: '潮汐時間', href: '/tide/', icon: '🌊', external: false },
-  { label: '導航', href: NAV_DEST_URL, icon: '📍', external: true },
+  { label: '導航', href: destination, icon: '📍', external: true },
 ];
 ---
 
