@@ -5,6 +5,7 @@ import QuickFacts from '../components/QuickFacts.astro';
 import GoogleRating from '../components/GoogleRating.astro';
 import { SITE } from '../data/site.js';
 import places from '../data/places.json';
+import { attractionNavigation } from '../data/attraction-navigation';
 import {
   article,
   breadcrumb,
@@ -25,6 +26,7 @@ const d = entry.data;
 const { Content } = await render(entry);
 
 const place = places.find((p) => p.slug === entry.id);
+const navigation = attractionNavigation(entry.id);
 const url = `/${entry.id}/`;
 
 const facts = [
@@ -95,6 +97,10 @@ const jsonLd = [
   breadcrumbs={crumbs}
   jsonLd={jsonLd}
 >
+  {navigation && <div slot="before" class="mb-5 rounded-xl border border-scale bg-white p-4">
+    <p class="text-sm text-ink/70">本頁導航目的地：<strong class="text-deepsea">{navigation.name}</strong>（{navigation.address}）</p>
+    <a href={navigation.url} target="_blank" rel="noopener noreferrer" class="mt-3 inline-flex rounded-full bg-deepsea px-4 py-2 text-sm font-semibold text-white">在 Google 地圖查看 {navigation.name}</a>
+  </div>}
   {facts.length > 0 && <QuickFacts slot="before" rows={facts} title="基本資料" />}
   {
     entry.id === 'yulin-tianti' && (

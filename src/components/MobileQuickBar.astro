@@ -7,10 +7,15 @@
  */
 import { NAV_DEST_URL } from '../data/site.js';
 import { placeForGuide } from '../data/guide-places';
+import { attractionNavigation } from '../data/attraction-navigation';
 
 const path = Astro.url.pathname;
 const guideSlug = path.match(/^\/guides\/([^/]+)\/?$/)?.[1];
-const destination = guideSlug && guideSlug !== 'nanliao-at-night' ? placeForGuide(guideSlug).maps : NAV_DEST_URL;
+const attractionSlug = path.match(/^\/([^/]+)\/?$/)?.[1];
+const attraction = attractionSlug ? attractionNavigation(attractionSlug) : null;
+const destination = guideSlug && guideSlug !== 'nanliao-at-night'
+  ? placeForGuide(guideSlug).maps
+  : attraction?.url ?? NAV_DEST_URL;
 const isActive = (href: string) => path.startsWith(href);
 
 const actions = [

@@ -1,12 +1,18 @@
 ---
 import { SITE, NAV, NAV_DEST_URL } from '../data/site.js';
 import { placeForGuide } from '../data/guide-places';
+import { attractionNavigation } from '../data/attraction-navigation';
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
   href === '/' ? path === '/' : path.startsWith(href);
 const guideSlug = path.match(/^\/guides\/([^/]+)\/?$/)?.[1];
-const navUrl = guideSlug && guideSlug !== 'nanliao-at-night' ? placeForGuide(guideSlug).maps : NAV_DEST_URL;
-const navLabel = guideSlug && guideSlug !== 'nanliao-at-night' ? `導航：${placeForGuide(guideSlug).name}` : '立即導航';
+const attractionSlug = path.match(/^\/([^/]+)\/?$/)?.[1];
+const attraction = attractionSlug ? attractionNavigation(attractionSlug) : null;
+const destination = guideSlug && guideSlug !== 'nanliao-at-night'
+  ? { url: placeForGuide(guideSlug).maps, name: placeForGuide(guideSlug).name }
+  : attraction ? { url: attraction.url, name: attraction.name } : null;
+const navUrl = destination?.url ?? NAV_DEST_URL;
+const navLabel = destination ? `導航：${destination.name}` : '立即導航';
 ---
 
 <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-scale">
